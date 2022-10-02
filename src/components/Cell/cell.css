@@ -1,0 +1,69 @@
+.cell-container {
+    --main-length: 1.5rem;
+    position: relative;
+    display: grid;
+    place-items: center;
+}
+
+.cell-container .main-content {
+    color: azure;
+    border-radius: 0.25rem;
+    width: var(--main-length);
+    height: var(--main-length);
+    user-select: none;
+    display: grid;
+    place-items: center;
+    font-family: monospace;
+    font-size: 0.5rem;
+}
+
+.cell-container .tooltip {
+    --tool-bg: #cef4ee;
+    --tip-length: 1rem;
+    --tool-width: 15rem;
+    background: var(--tool-bg);
+    position: absolute;
+    top: calc(100% + var(--tip-length));
+    left: calc(50% - var(--tool-width) / 2);
+    border-radius: 0.25rem;
+    padding: 1rem;
+    width: var(--tool-width);
+    transform: scale(0);
+    transform-origin: top;
+    transition: transform 0.33s, opacity 1s;
+    opacity: 0;
+    z-index: 1;
+}
+
+.cell-container .tooltip.inactive {
+    transform: scale(0);
+    opacity: 0;
+}
+
+.cell-container .tooltip.active {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.cell-container .tooltip .tip {
+    width: 0;
+    height: 0;
+    display: block;
+    position: absolute;
+    top: calc(-1 * var(--tip-length));
+    left: calc(50% - var(--tip-length));
+    border-left: var(--tip-length) solid transparent;
+    border-right: var(--tip-length) solid transparent;
+    border-bottom: var(--tip-length) solid var(--tool-bg);
+}
+
+@media screen and (max-width: 600px) {
+    /* .cell-container {
+            --main-length: 1.5rem;
+    } */
+
+    .cell-container .tooltip {
+        --tool-width: 10rem;
+        padding: 0.5rem;
+    }
+}

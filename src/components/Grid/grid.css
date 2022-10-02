@@ -1,0 +1,146 @@
+.grid .cells-container {
+    display: grid;
+    grid-template-columns: repeat(30 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    gap: 0.25rem;
+}
+
+.grid .cell-container .main-content {
+    background: #573846;
+    transition: background-color 0.33s, color 0.33s;
+}
+
+.grid .cell-container .main-content.pink {
+    background: rgb(245, 177, 177);
+    color: black;
+}
+
+.grid .cell-container .main-content.blue {
+    background: rgb(206, 206, 247);
+    color: black;
+}
+
+.grid .cell-container .content .date {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.grid .cell-container .content .cell-input {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(156, 5, 5, 0.25);
+    padding: 0.5rem;
+}
+
+.grid .cell-container .content .cell-input input[type="checkbox"] {
+    appearance: none;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    border: 1px solid black;
+    border-radius: 0.25rem;
+    display: grid;
+    place-items: center;
+}
+
+.grid .cell-container .content .cell-input input[type="checkbox"]::after {
+    background: #578aef;
+    display: block;
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 0.1rem;
+    opacity: 0;
+    transition: opacity 0.33s;
+}
+
+.grid
+    .cell-container
+    .content
+    .cell-input
+    input[type="checkbox"]:checked::after {
+    opacity: 1;
+}
+
+.grid .days {
+    display: flex;
+}
+
+.grid .days .names {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-right: 1rem;
+}
+
+.grid .days .names p {
+    display: grid;
+    place-items: center;
+    height: 1.5rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.grid .navigation {
+    display: flex;
+    margin-top: 1rem;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.grid .navigation button {
+    background: transparent;
+    background-size: cover;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: none;
+    transition: background-color 0.33s;
+}
+
+.grid .navigation button.disabled {
+    filter: invert(25%);
+}
+
+.grid .navigation button:not(.disabled):active {
+    transform: scale(96%);
+}
+
+.grid .navigation .left {
+    background-image: url("./assets/left.svg");
+}
+
+.grid .navigation .right {
+    background-image: url("./assets/right.svg");
+}
+
+@media (hover: hover) {
+    .grid .navigation button:not(.disabled):hover {
+        background-color: rgba(146, 177, 255, 0.5);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    /* .grid .cells-container {
+        gap: 0.15rem;
+    }
+
+    .grid .days .names {
+        gap: 0.25rem;
+        margin-right: 1rem;
+    } */
+
+    .grid .days .names p {
+        /* background: red; */
+        display: grid;
+        place-items: center;
+        /* height: 1.5rem; */
+    }
+    /* .grid .cell-container .content .cell-input {
+        margin-bottom: 0.5rem;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    } */
+}
