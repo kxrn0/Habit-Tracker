@@ -1,3 +1,6 @@
+import "./tool_content.css";
+//import "../../css/custom_checkbox.css";
+
 export default function ToolContent({ cell, update_habit }) {
     const { date, tasks, stringDate } = cell;
     return (
@@ -7,6 +10,7 @@ export default function ToolContent({ cell, update_habit }) {
                 {tasks.map((task) => (
                     <li key={`item-${task.id}-${date}`} className="cell-input">
                         <input
+                            className="custom-checkbox"
                             id={`task-${task.id}-${date}`}
                             type="checkbox"
                             checked={task.checked}

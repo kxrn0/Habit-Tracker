@@ -56,7 +56,7 @@ export default function Stick({ habit, update_habit }) {
         const stringDate = `${currentDate.getFullYear()}-${String(
             currentDate.getMonth() + 1
         ).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
-        const element = { date: null, stringDate };
+        const element = { date: null, stringDate, day: currentDate.getDate() };
 
         if (currentDate <= presentDay) {
             element.date = currentDate.toDateString();
@@ -122,43 +122,41 @@ export default function Stick({ habit, update_habit }) {
 
     return (
         <div className="stick">
-            <a className="link">
-                <img
-                    src={habit.image}
-                    alt=""
-                    style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "50%",
-                    }}
-                />
+            <a className="link" href="https://ol.reddit.com">
+                <img src={habit.image} alt="" />
                 <p className="habit-name">{habit.name}</p>
             </a>
             <div className="days">
-                <ul style={{ display: "flex", gap: "2rem" }}>
+                <ul className="days-list">
                     {days.map((day) => {
                         if (day.date) {
                             const todo = day.tasks[0];
 
                             if (todo.name === null) {
                                 return (
-                                    <input
+                                    <div
+                                        className="day"
                                         key={`stickbox-${day.stringDate}`}
-                                        type="checkbox"
-                                        checked={day.tasks[0].checked}
-                                        onChange={() =>
-                                            update_habit(
-                                                todo.id,
-                                                day.stringDate
-                                            )
-                                        }
-                                    />
+                                    >
+                                        <input
+                                        className="custom-checkbox"
+                                            type="checkbox"
+                                            checked={day.tasks[0].checked}
+                                            onChange={() =>
+                                                update_habit(
+                                                    todo.id,
+                                                    day.stringDate
+                                                )
+                                            }
+                                        />
+                                        <span>{day.day}</span>
+                                    </div>
                                 );
                             } else {
                                 return (
                                     <Cell
                                         key={`stickbox-${day.stringDate}`}
-                                        mainContent=""
+                                        mainContent={day.day}
                                         toolContent={
                                             <ToolContent
                                                 cell={day}
@@ -174,11 +172,12 @@ export default function Stick({ habit, update_habit }) {
                             }
                         } else
                             return (
-                                <input
+                                <div
+                                    className="day"
                                     key={`stickbox-${day.stringDate}`}
-                                    type="checkbox"
-                                    disabled
-                                />
+                                >
+                                    <input type="checkbox" disabled />
+                                </div>
                             );
                     })}
                 </ul>

@@ -57,6 +57,21 @@
     border-bottom: var(--tip-length) solid var(--tool-bg);
 }
 
+.cell-container .main-content.black {
+    background: #573846;
+    transition: background-color 0.33s, color 0.33s;
+}
+
+.cell-container .main-content.pink {
+    background: rgb(245, 177, 177);
+    color: black;
+}
+
+.cell-container .main-content.blue {
+    background: rgb(206, 206, 247);
+    color: black;
+}
+
 @media screen and (max-width: 600px) {
     /* .cell-container {
             --main-length: 1.5rem;

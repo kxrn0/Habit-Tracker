@@ -1,7 +1,7 @@
 import rarePepe from "./assets/rare_pepe.jpg";
 
 export const dataZero = {
-    name: "push up sets",
+    name: "push up sets, this is a string",
     id: "123abc",
     image: rarePepe,
     todos: [

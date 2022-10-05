@@ -4,7 +4,8 @@ import Stick from "./components/Stick/Stick";
 
 import Habit from "./components/Habit/Habit";
 import { useState } from "react";
-import "./style.css";
+import "./css/style.css";
+import "./css/custom_checkbox.css";
 
 
 function App() {
@@ -38,8 +39,8 @@ function App() {
 
     return (
         <div className="App">
-            {/* <Habit data={habit} update={update_habit} /> */}
-            <Stick habit={habit} update_habit={update_habit}/>
+            <Habit data={habit} update={update_habit} />
+            {/* <Stick habit={habit} update_habit={update_habit}/> */}
         </div>
     );
 }
