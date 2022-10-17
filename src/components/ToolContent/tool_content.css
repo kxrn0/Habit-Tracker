@@ -11,28 +11,3 @@
     border-bottom: 1px solid rgba(156, 5, 5, 0.25);
     padding: 0.5rem;
 }
-
-/* .cell-container .content .cell-input input[type="checkbox"] {
-    appearance: none;
-    min-width: 1.1rem;
-    height: 1.1rem;
-    border: 1px solid black;
-    border-radius: 0.25rem;
-    display: grid;
-    place-items: center;
-}
-
-.cell-container .content .cell-input input[type="checkbox"]::after {
-    background: #578aef;
-    display: block;
-    content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 0.1rem;
-    opacity: 0;
-    transition: opacity 0.33s;
-}
-
-.cell-container .content .cell-input input[type="checkbox"]:checked::after {
-    opacity: 1;
-} */

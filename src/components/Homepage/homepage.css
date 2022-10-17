@@ -1,0 +1,223 @@
+.homepage {
+    flex-grow: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.homepage .mep {
+    color: rgb(89, 81, 81);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.homepage .mep .icon {
+    color: rgb(105, 99, 104);
+    font-size: 6rem;
+    font-family: monospace;
+}
+
+.homepage .clock {
+    align-self: flex-start;
+    font-family: monospace;
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.homepage .clock .hours {
+    font-size: 2rem;
+}
+
+.homepage .add-habit {
+    background-image: url("../../assets/plus-circle.svg");
+    background-color: aliceblue;
+    font-size: 0.75rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    border: none;
+}
+
+.homepage .aside {
+    --width: 32rem;
+    background: rgb(4, 46, 49);
+    padding: 2rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: var(--width);
+    height: 100%;
+    transition: right 0.33s;
+}
+
+.homepage .aside .open-aside {
+    background-color: rgb(182, 242, 242, 0.85);
+    background-image: url("../../assets/filter.svg");
+    appearance: none;
+    border-radius: 0.25rem;
+    border: 2px solid rgb(14, 14, 14);
+    width: 2rem;
+    height: 2rem;
+    position: absolute;
+    top: 1rem;
+    left: -20%;
+    transition: opacity 0.33s, left 0.33s;
+}
+
+.homepage .aside .open-aside:checked {
+    background-image: url("../../assets/close.svg");
+    background-color: rgb(61, 69, 84);
+    border-color: aliceblue;
+    left: 90%;
+}
+
+.homepage .aside .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.homepage .aside .filters label {
+    display: flex;
+    align-items: center;
+}
+
+.homepage .aside .filters label input[type="text"] {
+    background: rgb(215, 233, 251);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    width: 10rem;
+    border: none;
+}
+
+.homepage .aside .filters label span {
+    background-image: url("../../assets/magnify.svg");
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.homepage .aside .filters .controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.homepage .aside .filters .controls button {
+    background: rgb(100, 82, 82);
+    color: azure;
+    font-size: 1.15rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+.homepage .aside .filters .divider {
+    --divider-width: 1.25rem;
+    --divider-height: 1.25rem;
+    --line-width: 13rem;
+    --line-height: 0.1rem;
+    background-image: url("../../assets/rabbit-house.svg");
+    width: var(--divider-width);
+    height: var(--divider-height);
+    position: relative;
+}
+
+.homepage .aside .filters .divider::before,
+.homepage .aside .filters .divider::after {
+    content: "";
+    display: block;
+    height: var(--line-height);
+    position: absolute;
+    top: calc(var(--divider-height) / 2 - var(--line-height) / 2);
+    width: var(--line-width);
+}
+
+.homepage .aside .filters .divider::before {
+    background: rgb(187, 187, 236);
+    right: 100%;
+}
+
+.homepage .aside .filters .divider::after {
+    background: rgb(244, 244, 180);
+    left: 100%;
+}
+
+.homepage .aside .filters .tags,
+.homepage .aside .filters .current-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.homepage .aside .filters .tag {
+    background: rgb(146, 146, 215);
+    color: azure;
+    display: flex;
+    align-items: center;
+    padding: 0.35rem;
+    border-radius: 0.25rem;
+    cursor: default;
+}
+
+.homepage .aside .filters .tags button,
+.homepage .aside .filters .current-filters button {
+    background-color: transparent;
+    border: none;
+    width: 1rem;
+    height: 1rem;
+}
+
+.homepage .aside .filters .tags button {
+    background-image: url("../../assets/pound.svg");
+}
+
+.homepage .aside .filters .current-filters button {
+    background-image: url("../../assets/close.svg");
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+@media screen and (max-width: 500px) {
+    .homepage .aside {
+        --width: 80%;
+    }
+
+    .homepage .aside .open-aside {
+        left: -20%;
+    }
+
+    .homepage .aside .open-aside:checked {
+        left: 85%;
+    }
+
+    .homepage .aside .filters .divider {
+        --line-width: 7rem;
+    }
+
+    .homepage .aside .open-aside {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .homepage .mep {
+        text-align: center;
+    }
+
+    .homepage .mep .icon {
+        font-size: 3rem;
+    }
+}

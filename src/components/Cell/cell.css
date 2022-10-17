@@ -73,11 +73,7 @@
 }
 
 @media screen and (max-width: 600px) {
-    /* .cell-container {
-            --main-length: 1.5rem;
-    } */
-
-    .cell-container .tooltip {
+   .cell-container .tooltip {
         --tool-width: 10rem;
         padding: 0.5rem;
     }

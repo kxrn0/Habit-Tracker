@@ -8,7 +8,7 @@ import Cell from "../Cell/Cell";
 import ToolContent from "../ToolContent/ToolContent";
 import { useEffect, useState } from "react";
 
-export default function Grid({ update_habit, habit }) {
+export default function Grid({ update, habit }) {
     const [weeks, setWeeks] = useState(20);
     const [offset, setOffset] = useState(0);
     const [activeCell, setActiveCell] = useState("");
@@ -36,8 +36,8 @@ export default function Grid({ update_habit, habit }) {
             )}`;
             const cell = {
                 stringDate,
-                number: currentDate.getDate(),
                 date: currentDate.toDateString(),
+                number: currentDate.getDate(),
             };
 
             cell.tasks = [];
@@ -137,8 +137,9 @@ export default function Grid({ update_habit, habit }) {
                                     mainContent={cell.number}
                                     toolContent={
                                         <ToolContent
+                                            habitId={habit.id}
                                             cell={cell}
-                                            update_habit={update_habit}
+                                            update={update}
                                         />
                                     }
                                     state={cell.state}

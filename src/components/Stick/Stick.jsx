@@ -5,45 +5,10 @@ import Cell from "../Cell/Cell";
 import { useState, useEffect } from "react";
 import start from "../../utilities/start";
 import date_in_range from "../../utilities/date_in_range";
+import { Link } from "react-router-dom";
 
-export default function Stick({ habit, update_habit }) {
-    /**
-     * What is displayed by the sticks?
-     * There will be a row of checkboxes, the kind of behaviour will depend on what kind of
-     * day the box represents, and what TODOs that day has. The stick displays the entire
-     * current week, even days that still haven't passed, so the future days are locked, or
-     * inactive.
-     * If there are TODOs for the current day, the cell will pop up a modal with them, else
-     * the cell will have a regular checkbox. I think that the stick should also keep track
-     * of the current active cell, like the grid.
-     * To begin creating the cells, I will need an array of days. The first will contain a
-     * string representing the start of the current week. I think I may need to componentize
-     * the tool content, so I'll be able to use the same component here and on the grid.
-     *
-     */
-
-    /**
-     * 1.- What is a stick?
-     * A stick is an IU element that lets the user edit the habit for the days of the current week.
-     *
-     * 2.- There are three types of elements that can be used for changing the habit in a particular
-     * day, what are those?
-     * The elements can be a checkbox, for when the habit doesn't have TODOs for that particular day.
-     * They can also be cells with a tooltip for displying TODOs for when the habit does have TODOs
-     * for that particular day.
-     * They can be a disabled checkbox, for days in the current week that haven't yet come to pass.
-     *
-     * So the days are stored in an array with seven elements. What kind of data do you need create
-     * an input element in the stick?
-     * I will, of course, sneed the date for that particular day. I also will need to know the TODOs
-     * of that habit for that particular day, if any. And if the current date is in the future.
-     * So, it seems that to create the array of days I will need to know the date of the first day of
-     * the current day, and the current day. I should probably refactor the grid to use toDateString()
-     * strings instead of what I have them use now.
-     */
-
+export default function Stick({ habit, update }) {
     const [activeCell, setActiveCell] = useState("");
-
     const millisInDay = 3600 * 24 * 1000;
     const days = [];
     const presentDay = new Date();
@@ -111,8 +76,10 @@ export default function Stick({ habit, update_habit }) {
             }
 
             const cell = event.target.closest(".cell-container");
+            const stick = event.target.closest(".stick");
 
-            if (!cell) setActiveCell("");
+            if (!cell || (stick && stick.id !== `stick-id-${habit.id}`))
+                setActiveCell("");
         }
 
         document.addEventListener("click", close_cell);
@@ -121,11 +88,15 @@ export default function Stick({ habit, update_habit }) {
     });
 
     return (
-        <div className="stick">
-            <a className="link" href="https://ol.reddit.com">
-                <img src={habit.image} alt="" />
+        <div className="stick" id={`stick-id-${habit.id}`}>
+            <Link
+                to={`/habits/${habit.id}`}
+                className="link"
+                href="https://ol.reddit.com"
+            >
+                <img src={habit.image} alt="habit image" />
                 <p className="habit-name">{habit.name}</p>
-            </a>
+            </Link>
             <div className="days">
                 <ul className="days-list">
                     {days.map((day) => {
@@ -134,23 +105,24 @@ export default function Stick({ habit, update_habit }) {
 
                             if (todo.name === null) {
                                 return (
-                                    <div
+                                    <li
                                         className="day"
                                         key={`stickbox-${day.stringDate}`}
                                     >
                                         <input
-                                        className="custom-checkbox"
+                                            className="custom-checkbox plain-checkbox"
                                             type="checkbox"
                                             checked={day.tasks[0].checked}
                                             onChange={() =>
-                                                update_habit(
+                                                update(
+                                                    habit.id,
                                                     todo.id,
                                                     day.stringDate
                                                 )
                                             }
                                         />
                                         <span>{day.day}</span>
-                                    </div>
+                                    </li>
                                 );
                             } else {
                                 return (
@@ -159,8 +131,9 @@ export default function Stick({ habit, update_habit }) {
                                         mainContent={day.day}
                                         toolContent={
                                             <ToolContent
+                                                habitId={habit.id}
                                                 cell={day}
-                                                update_habit={update_habit}
+                                                update={update}
                                             />
                                         }
                                         state={day.state}
@@ -172,15 +145,26 @@ export default function Stick({ habit, update_habit }) {
                             }
                         } else
                             return (
-                                <div
+                                <li
                                     className="day"
                                     key={`stickbox-${day.stringDate}`}
                                 >
                                     <input type="checkbox" disabled />
-                                </div>
+                                </li>
                             );
                     })}
                 </ul>
+            </div>
+            <div className="difficulty">
+                <span
+                    className={`hard ${habit.difficulty === 2 ? "active" : ""}`}
+                ></span>
+                <span
+                    className={`medium ${
+                        habit.difficulty >= 1 ? "active" : ""
+                    }`}
+                ></span>
+                <span className="easy active"></span>
             </div>
         </div>
     );

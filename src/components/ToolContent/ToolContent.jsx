@@ -1,8 +1,8 @@
 import "./tool_content.css";
-//import "../../css/custom_checkbox.css";
 
-export default function ToolContent({ cell, update_habit }) {
+export default function ToolContent({ habitId, cell, update }) {
     const { date, tasks, stringDate } = cell;
+
     return (
         <div key={`cell-${date}`} className="content">
             <p className="date">{cell.date}</p>
@@ -14,7 +14,9 @@ export default function ToolContent({ cell, update_habit }) {
                             id={`task-${task.id}-${date}`}
                             type="checkbox"
                             checked={task.checked}
-                            onChange={() => update_habit(task.id, stringDate)}
+                            onChange={() =>
+                                update(habitId, task.id, stringDate)
+                            }
                         />
                         <label htmlFor={`task-${task.id}-${date}`}>
                             {task.name

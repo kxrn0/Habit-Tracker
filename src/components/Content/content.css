@@ -1,0 +1,155 @@
+.creation-content {
+    background: rgba(200, 222, 233, 0.75);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: scroll;
+    max-height: 90vh;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.creation-content::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .creation-content {
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+
+.creation-content .head {
+    display: flex;
+    gap: 1rem;
+}
+
+.creation-content .head .details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.creation-content .head #name-input {
+    background: rgb(236, 238, 241);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+.creation-content .head #description-input {
+    background: rgb(236, 238, 241);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+.creation-content .head .details label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.creation-content .head .details label[for="description-input"] {
+    flex-grow: 1;
+}
+
+.creation-content .head textarea {
+    height: 100%;
+}
+
+.creation-content .difficulty-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.creation-content .difficulty-wrapper .difficulty-controls {
+    align-self: flex-start;
+}
+
+.creation-content .tags-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.creation-content .todos-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.creation-content .todos-wrapper .title {
+    font-size: 2rem;
+}
+
+.creation-content .todos-wrapper .add-todo {
+    background-color: aliceblue;
+    background-image: url("../../assets/plus-circle.svg");
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 100%;
+    align-self: center;
+}
+
+.creation-content .button-of-creation {
+    background: rgb(68, 250, 68);
+    color: rgb(109, 64, 64);
+    padding: 1rem 5rem;
+    font-size: 1.25rem;
+    width: fit-content;
+    align-self: center;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+.creation-content .image {
+    --button-bg: rgb(200, 241, 241, 0.75);
+}
+
+.creation-content .image .image-label-input,
+.creation-content .image .delete-image {
+    position: absolute;
+    top: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+.creation-content .image .image-label-input {
+    left: 1rem;
+}
+
+.creation-content .image .delete-image {
+    background-color: var(--button-bg);
+    background-image: url("../../assets/delete.svg");
+    right: 1rem;
+}
+
+.creation-content .image .image-label-input .icon {
+    background-color: var(--button-bg);
+    background-image: url("../../assets/image.svg");
+    border-radius: 0.25rem;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.creation-content .image .image-label-input input[type="file"] {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+@media screen and (max-width: 500px) {
+    .creation-content .head #name-input {
+        width: 9rem;
+    }   
+
+    .creation-content .head #description-input {
+        width: 9rem;
+    }
+}

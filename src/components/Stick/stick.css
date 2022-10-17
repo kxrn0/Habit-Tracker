@@ -3,9 +3,10 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-radius: 1rem;
+    border-radius: 2rem;
     border-top-left-radius: 10rem;
     border-bottom-left-radius: 10rem;
+    width: fit-content;
 }
 
 .stick .link {
@@ -26,6 +27,7 @@
 .stick .link img {
     width: 5rem;
     height: 5rem;
+    object-fit: cover;
     border-radius: 100%;
 }
 
@@ -40,6 +42,32 @@
     background: #744c5e;
 }
 
+.stick .day {
+    position: relative;
+}
+
+.stick .day span {
+    color: azure;
+    font-size: 0.5rem;
+    font-family: monospace;
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.stick .custom-checkbox.plain-checkbox:checked {
+    background: rgb(134, 219, 255);
+}
+
+.stick .custom-checkbox.plain-checkbox:checked + span {
+    display: none;
+}
+
 .stick input[type="checkbox"]:disabled {
     background: linear-gradient(45deg, gray, rgb(106, 102, 102));
     border-radius: 0.15rem;
@@ -47,4 +75,53 @@
     width: 1rem;
     height: 1rem;
     cursor: not-allowed;
+}
+
+.stick .difficulty span {
+    display: block;
+    width: 1rem;
+    height: 1.7rem;
+}
+
+.stick .difficulty .easy {
+    background: rgb(152, 152, 242);
+    border-bottom-right-radius: 33%;
+}
+
+.stick .difficulty .medium {
+    background: rgb(233, 233, 114);
+}
+
+.stick .difficulty .hard {
+    background: rgb(240, 89, 89);
+    border-top-right-radius: 33%;
+}
+
+.stick .difficulty span:not(.active) {
+    opacity: 0.5;
+}
+
+@media screen and (max-width: 500px) {
+    .stick {
+        gap: .25rem;
+    }
+
+    .stick .days .days-list {
+        gap: .25rem;
+    }
+
+    .stick .link img {
+        width: 3.75rem;
+        height: 3.75rem;
+    }
+
+    .stick .link p {
+        width: 5rem;
+        font-size: 0.75rem;
+    }
+
+    .stick .difficulty span {
+        width: .5rem;
+        height: 1.25rem;
+    }
 }

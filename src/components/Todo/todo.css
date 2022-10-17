@@ -1,0 +1,117 @@
+.todos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.todos .title {
+    font-size: 2rem;
+}
+
+.todos .add-todo {
+    background-color: aliceblue;
+    background-image: url("../../assets/plus-circle.svg");
+    border-radius: 100%;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+}
+
+.todo-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.todo {
+    background: rgb(82, 82, 101);
+    color: aliceblue;
+    padding: 2rem 1rem;
+    border-radius: 0.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 20rem;
+}
+
+.todo .todo-name {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.todo .todo-name .name {
+    flex-grow: 1;
+}
+
+.todo .range-controls {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+    gap: 1rem;
+}
+
+.todo .range-controls .section {
+    background: rgb(0, 255, 221, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.todo .range-controls .logic-toggle span {
+    font-size: 1.5rem;
+}
+
+.todo .delete-todo {
+    background-color: rgba(255, 185, 185, 0.85);
+    background-image: url("../../assets/delete.svg");
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+.todo .container-of-change {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.todo .container-of-change input[type="text"] {
+    background: rgb(241, 246, 251);
+    width: 10rem;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    border: none;
+}
+
+.todo .container-of-change .controls-of-change {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.todo .container-of-change button {
+    padding: 0.25rem;
+    width: 5rem;
+    font-size: 0.75rem;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+.todo .container-of-change .controls-of-change .save {
+    background: greenyellow;
+}
+
+.todo .container-of-change .controls-of-change .cancel {
+    background: rgb(255, 123, 123);
+    color: azure;
+}

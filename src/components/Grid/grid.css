@@ -6,23 +6,6 @@
     gap: 0.25rem;
 }
 
-/* .grid .cell-container .main-content {
-    background: #573846;
-    transition: background-color 0.33s, color 0.33s;
-}
-
-.grid .cell-container .main-content.pink {
-    background: rgb(245, 177, 177);
-    color: black;
-}
-
-.grid .cell-container .main-content.blue {
-    background: rgb(206, 206, 247);
-    color: black;
-} */
-
-
-
 .grid .days {
     display: flex;
 }
@@ -63,10 +46,6 @@
     filter: invert(25%);
 }
 
-.grid .navigation button:not(.disabled):active {
-    transform: scale(96%);
-}
-
 .grid .navigation .left {
     background-image: url("./assets/left.svg");
 }
@@ -75,31 +54,9 @@
     background-image: url("./assets/right.svg");
 }
 
-@media (hover: hover) {
-    .grid .navigation button:not(.disabled):hover {
-        background-color: rgba(146, 177, 255, 0.5);
-    }
-}
-
 @media screen and (max-width: 600px) {
-    /* .grid .cells-container {
-        gap: 0.15rem;
-    }
-
-    .grid .days .names {
-        gap: 0.25rem;
-        margin-right: 1rem;
-    } */
-
     .grid .days .names p {
-        /* background: red; */
         display: grid;
         place-items: center;
-        /* height: 1.5rem; */
     }
-    /* .grid .cell-container .content .cell-input {
-        margin-bottom: 0.5rem;
-        gap: 0.5rem;
-        padding: 0.5rem;
-    } */
 }

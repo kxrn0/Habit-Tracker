@@ -1,0 +1,73 @@
+.difficulty-controls {
+    background: rgba(64, 17, 17, 0.5);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: fit-content;
+}
+
+.difficulty-controls .boxes {
+    display: flex;
+    gap: 1px;
+}
+
+.difficulty-controls .labels {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.difficulty-controls .labels label {
+    color: azure;
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25rem;
+}
+
+.difficulty-controls .boxes input[type="checkbox"] {
+    background: red;
+    appearance: none;
+    width: 5rem;
+    height: 1rem;
+    transition: opacity 0.33s;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#hard {
+    background: rgb(240, 89, 89);
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#hard:checked {
+    border-top: 1px solid azure;
+    border-left: 1px solid azure;
+    border-bottom: 1px solid azure;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#medium {
+    background: rgb(233, 233, 114);
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#medium:checked {
+    border-top: 1px solid azure;
+    border-bottom: 1px solid azure;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#easy {
+    background: rgb(152, 152, 242);
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]#easy:checked {
+    border-top: 1px solid azure;
+    border-right: 1px solid azure;
+    border-bottom: 1px solid azure;
+}
+
+.difficulty-controls .boxes input[type="checkbox"]:not(:checked) {
+    opacity: 0.35;
+}

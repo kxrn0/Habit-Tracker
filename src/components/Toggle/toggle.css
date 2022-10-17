@@ -1,0 +1,45 @@
+.logic-toggle {
+    --track-width: 3rem;
+    --track-height: 1.5rem;
+    --ball-radius: 0.5rem;
+    --left: 0.25rem;
+    color: azure;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logic-toggle span {
+    user-select: none;
+}
+
+.logic-toggle .track {
+    position: relative;
+    width: var(--track-width);
+    height: var(--track-height);
+}
+
+.logic-toggle .track span {
+    position: absolute;
+    background: black;
+    width: calc(2 * var(--ball-radius));
+    height: calc(2 * var(--ball-radius));
+    top: calc(50% - var(--ball-radius));
+    left: var(--left);
+    border-radius: 100%;
+    transition: left 0.33s;
+    pointer-events: none;
+}
+
+.logic-toggle .track input[type="checkbox"] {
+    display: block;
+    background: white;
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--track-height);
+}
+
+.logic-toggle .track input[type="checkbox"]:checked + span {
+    left: calc(var(--track-width) - var(--left) - 2 * var(--ball-radius));
+}
