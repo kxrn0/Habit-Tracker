@@ -190,7 +190,7 @@ function App() {
             .concat(habits.slice(habitIndex + 1));
 
         if (toRelocateId) {
-            const result = relocated_data(updatedHabits, habit.id);
+            const result = relocate_data(updatedHabits, habit.id);
 
             updatedHabits = result.data;
             relocate(toRelocateId, result.todo);
@@ -199,7 +199,7 @@ function App() {
         setHabits(updatedHabits);
     }
 
-    function relocated_data(data, habitId) {
+    function relocate_data(data, habitId) {
         const index = data.findIndex((habit) => habit.id === habitId);
         const habit = data[index];
         const todo = {

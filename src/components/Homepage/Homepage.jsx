@@ -90,6 +90,9 @@ export default function Homepage({ habits, update, add_habit }) {
             sessionStorage.setItem(storageKeyInactive, JSON.stringify(tags));
             return tags;
         });
+        setCurrentShownTags((prevTags) =>
+            prevTags.filter((other) => other !== tag)
+        );
     }
 
     function remove_from_current(tag) {
@@ -105,14 +108,27 @@ export default function Homepage({ habits, update, add_habit }) {
             sessionStorage.setItem(setInactiveTags, JSON.stringify(tags));
             return tags;
         });
+        setCurrentShownTags(() => {
+            asideInputRef.current.value = "";
+
+            return [
+                ...get_all_tags().filter((tag) => !currentTags.includes(tag)),
+                tag,
+            ];
+        });
+    }
+
+    function get_all_tags() {
+        const tags = [];
+
+        for (let habit of habits)
+            for (let tag of habit.tags) if (!tags.includes(tag)) tags.push(tag);
+
+        return tags;
     }
 
     function clear_all_tags() {
-        const allTags = [];
-
-        for (let habit of habits)
-            for (let tag of habit.tags)
-                if (!allTags.includes(tag)) allTags.push(tag);
+        const allTags = get_all_tags();
 
         sessionStorage.setItem(storageKeyCurrent, "");
         sessionStorage.setItem(storageKeyInactive, JSON.stringify(allTags));
