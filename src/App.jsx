@@ -168,7 +168,7 @@ function App() {
         );
     }
 
-    function toggle_habit_range(habitId, todoId, range) {
+    function toggle_habit_range(habitId, todoId, range, toRelocateId) {
         change_range(habitId, todoId, range);
 
         const habitIndex = habits.findIndex((habit) => habit.id === habitId);
@@ -182,20 +182,26 @@ function App() {
             .slice(0, todoIndex)
             .concat({ ...todo, range, dates })
             .concat(habit.todos.slice(todoIndex + 1));
+        let updatedHabits;
 
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, habitIndex)
-                .concat({ ...habit, todos })
-                .concat(prevHabits.slice(habitIndex + 1))
-        );
+        updatedHabits = habits
+            .slice(0, habitIndex)
+            .concat({ ...habit, todos })
+            .concat(habits.slice(habitIndex + 1));
+
+        if (toRelocateId) {
+            const result = relocated_data(updatedHabits, habit.id);
+
+            updatedHabits = result.data;
+            relocate(toRelocateId, result.todo);
+        }
+
+        setHabits(updatedHabits);
     }
 
-    function relocate_data(habitId) {
-        console.log(habits[1].todos[1].range);
-
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
+    function relocated_data(data, habitId) {
+        const index = data.findIndex((habit) => habit.id === habitId);
+        const habit = data[index];
         const todo = {
             name: habit.name,
             id: Math.random().toString(16).slice(-10),
@@ -206,13 +212,13 @@ function App() {
 
         todos.unshift({ ...habit.todos[0], dates: [] });
 
-        setHabits((prevHabits) =>
-            prevHabits
+        return {
+            data: data
                 .slice(0, index)
                 .concat({ ...habit, todos })
-                .concat(prevHabits.slice(index + 1))
-        );
-        relocate(habitId, todo);
+                .concat(data.slice(index + 1)),
+            todo: todo,
+        };
     }
 
     function add_todo_to_habit(habitId, todo) {
@@ -266,9 +272,6 @@ function App() {
 
     return (
         <div className="App">
-            <button onClick={() => console.log(habits[1].todos[1].range)}>
-                show habit range
-            </button>
             <BrowserRouter>
                 <nav className="navbar">
                     <div className="logo">Kerosene</div>
@@ -277,7 +280,10 @@ function App() {
                             <Underlink path="/Habit-Tracker" icon={homeIcon} />
                         </li>
                         <li>
-                            <Underlink path="/Habit-Tracker/info" icon={infoIcon} />
+                            <Underlink
+                                path="/Habit-Tracker/info"
+                                icon={infoIcon}
+                            />
                         </li>
                     </ul>
                 </nav>
@@ -309,7 +315,6 @@ function App() {
                                     change_description={update_description}
                                     remove_habit={remove_habit}
                                     toggle_habit_range={toggle_habit_range}
-                                    relocate_data={relocate_data}
                                     add_todo_to_habit={add_todo_to_habit}
                                     delete_todo={delete_todo}
                                     rename_todo={rename_todo}

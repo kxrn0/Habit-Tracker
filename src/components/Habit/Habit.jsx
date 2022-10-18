@@ -6,9 +6,9 @@ import Todo from "../Todo/Todo";
 import SlideScreen from "../SlideScreen/SlideScreen";
 import valid_file_type from "../../utilities/valid_file_type";
 import { Link } from "react-router-dom";
-import "./habit.css";
 import { useRef, useState } from "react";
 import date_in_range from "../../utilities/date_in_range";
+import "./habit.css";
 
 export default function Habit({
     habit,
@@ -21,7 +21,6 @@ export default function Habit({
     change_description,
     remove_habit,
     toggle_habit_range,
-    relocate_data,
     add_todo_to_habit,
     delete_todo,
     rename_todo,
@@ -116,6 +115,9 @@ export default function Habit({
         const index = todos.findIndex((todo) => todo.id === todoId);
         const todo = todos[index];
         const range = { ...todo.range };
+        let toRelocateId;
+
+        toRelocateId = null;
 
         if (side === "to") currentValue = !currentValue;
 
@@ -141,11 +143,9 @@ export default function Habit({
             range[side] = "free";
         }
 
-        toggle_habit_range(habit.id, todo.id, range);
-        //check_for_boundaries(range);
-        setTimeout(() => {
-            check_for_boundaries(range);
-        }, 3000);
+        if (check_for_boundaries(range)) toRelocateId = habit.id;
+
+        toggle_habit_range(habit.id, todo.id, range, toRelocateId);
     }
 
     function change_date(todoId, side, date) {
@@ -154,6 +154,9 @@ export default function Habit({
         const todo = todos[index];
         const range = { ...todo.range };
         const otherSide = side === "from" ? "to" : "from";
+        let toRelocateId;
+
+        toRelocateId = null;
 
         if (range[otherSide] !== "free") {
             const cond = side === "from" ? (a, b) => a <= b : (a, b) => a >= b;
@@ -165,8 +168,9 @@ export default function Habit({
 
         range[side] = date;
 
-        toggle_habit_range(habit.id, todo.id, range);
-        check_for_boundaries(range);
+        if (check_for_boundaries(range)) toRelocateId = habit.id;
+
+        toggle_habit_range(habit.id, todo.id, range, toRelocateId);
     }
 
     function check_for_boundaries(range) {
@@ -177,7 +181,8 @@ export default function Habit({
                 date_in_range(new Date(date), range)
             )
         )
-            relocate_data(habit.id);
+            return true;
+        return false;
     }
 
     function add_todo() {
@@ -212,7 +217,7 @@ export default function Habit({
                         <p className="element-name">{habit.name}</p>
                         <div className="delete-controls">
                             <button className="delete" onClick={delete_habit}>
-                                <Link to="/">Delete</Link>
+                                <Link to="/Habit-Tracker">Delete</Link>
                             </button>
                             <button
                                 className="cancel"

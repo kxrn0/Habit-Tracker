@@ -90,7 +90,7 @@ export default function Stick({ habit, update }) {
     return (
         <div className="stick" id={`stick-id-${habit.id}`}>
             <Link
-                to={`/habits/${habit.id}`}
+                to={`/Habit-Tracker/habits/${habit.id}`}
                 className="link"
                 href="https://ol.reddit.com"
             >

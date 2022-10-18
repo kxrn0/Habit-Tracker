@@ -4,7 +4,8 @@ import Clock from "../Clock/Clock";
 import Toggle from "../Toggle/Toggle";
 import Content from "../Content/Content";
 import SlideScreen from "../SlideScreen/SlideScreen";
-import { useState } from "react";
+import { is_substring } from "../../utilities/is_substring";
+import { useRef, useState } from "react";
 
 export default function Homepage({ habits, update, add_habit }) {
     const storageOrKey = "_storage_or_key";
@@ -51,6 +52,7 @@ export default function Homepage({ habits, update, add_habit }) {
         sessionStorage.setItem(storageKeyInactive, JSON.stringify(tags));
         return tags;
     });
+    const [currentShownTags, setCurrentShownTags] = useState([...inactiveTags]);
     const [aside, setAside] = useState(false);
     const sticks = habits
         .map((habit) => {
@@ -66,6 +68,7 @@ export default function Homepage({ habits, update, add_habit }) {
         .filter((stick) => stick !== null);
     const [screenOfCreation, setScreenOfCreation] = useState(false);
     const [creationContent, setCreationContent] = useState("");
+    const asideInputRef = useRef(null);
 
     //#region
 
@@ -116,6 +119,7 @@ export default function Homepage({ habits, update, add_habit }) {
 
         setCurrentTags([]);
         setInactiveTags(allTags);
+        setCurrentShownTags([...allTags]);
     }
 
     function add_new_habit(habit) {
@@ -133,6 +137,17 @@ export default function Homepage({ habits, update, add_habit }) {
         setTimeout(() => setCreationContent(""), 330);
     }
 
+    function handle_search_input(event) {
+        if (!event.target.value.trim()) setCurrentShownTags([...inactiveTags]);
+        else {
+            setCurrentShownTags(
+                inactiveTags.filter((tag) =>
+                    is_substring(event.target.value, tag)
+                )
+            );
+        }
+    }
+
     //#endregion
 
     return (
@@ -147,11 +162,10 @@ export default function Homepage({ habits, update, add_habit }) {
                 sticks
             ) : (
                 <div className="mep">
-                    {" "}
                     <p className="icon">{"\\（＞w＜）/"}</p>
                     <p className="message">
                         Nothing found, create a new habit, or reset your filters
-                    </p>{" "}
+                    </p>
                 </div>
             )}
             <button className="add-habit" onClick={set_up_screen}></button>
@@ -168,7 +182,13 @@ export default function Homepage({ habits, update, add_habit }) {
                 <div className="filters">
                     <label htmlFor="filter-search-bar">
                         <span></span>
-                        <input id="filter-search-bar" placeholder="search tag..." type="text" />
+                        <input
+                            id="filter-search-bar"
+                            placeholder="search tag..."
+                            type="text"
+                            ref={asideInputRef}
+                            onChange={handle_search_input}
+                        />
                     </label>
                     <div className="current-filters">
                         {currentTags.map((tag) => (
@@ -199,16 +219,20 @@ export default function Homepage({ habits, update, add_habit }) {
                     />
                     <div className="divider"></div>
                     <div className="tags">
-                        {inactiveTags.map((tag) => (
-                            <div
-                                key={`tag-${tag}`}
-                                className="tag"
-                                onClick={() => add_to_current(tag)}
-                            >
-                                <button className="add-tag"></button>
-                                <p>{tag}</p>
-                            </div>
-                        ))}
+                        {currentShownTags.length ? (
+                            currentShownTags.map((tag) => (
+                                <div
+                                    key={`tag-${tag}`}
+                                    className="tag"
+                                    onClick={() => add_to_current(tag)}
+                                >
+                                    <button className="add-tag"></button>
+                                    <p>{tag}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="no-pan">No tags found!</p>
+                        )}
                     </div>
                 </div>
             </aside>

@@ -23,7 +23,7 @@
 }
 
 .slide-screen.hidden {
-    top: -100%;
+    top: -125%;
 }
 
 .slide-screen.shown {
