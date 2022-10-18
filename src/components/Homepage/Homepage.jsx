@@ -127,8 +127,11 @@ export default function Homepage({ habits, update, add_habit }) {
         return tags;
     }
 
-    function clear_all_tags() {
-        const allTags = get_all_tags();
+    function clear_all_tags(tags) {
+        let allTags;
+
+        if (tags) allTags = [...get_all_tags(), ...tags];
+        else allTags = get_all_tags();
 
         sessionStorage.setItem(storageKeyCurrent, "");
         sessionStorage.setItem(storageKeyInactive, JSON.stringify(allTags));
@@ -139,6 +142,7 @@ export default function Homepage({ habits, update, add_habit }) {
     }
 
     function add_new_habit(habit) {
+        clear_all_tags(habit.tags);
         close_screen();
         add_habit(habit);
     }
@@ -221,7 +225,7 @@ export default function Homepage({ habits, update, add_habit }) {
                     <div className="controls">
                         <button
                             className="clear-filters"
-                            onClick={clear_all_tags}
+                            onClick={() => clear_all_tags(null)}
                         >
                             Clear all tags
                         </button>

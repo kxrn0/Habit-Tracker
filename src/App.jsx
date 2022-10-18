@@ -104,8 +104,6 @@ function App() {
     }
 
     function add_tag(habitId, tag) {
-        add_tag_from_habit(habitId, tag);
-
         const index = habits.findIndex((habit) => habit.id === habitId);
         const habit = habits[index];
         const tags = [...habit.tags, tag];
@@ -116,6 +114,7 @@ function App() {
                 .concat({ ...habit, tags })
                 .concat(prevHabits.slice(index + 1))
         );
+        add_tag_from_habit(habitId, tag);
     }
 
     function update_image(habitId, image) {
@@ -222,17 +221,28 @@ function App() {
     }
 
     function add_todo_to_habit(habitId, todo) {
-        add_todo(habitId, todo);
-
         const index = habits.findIndex((habit) => habit.id === habitId);
         const habit = habits[index];
+        const today = new Date();
+        const todaysString = `${today.getFullYear()}-${String(
+            today.getMonth() + 1
+        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const namelessDates = habit.todos[0].dates.filter(
+            (date) => date != todaysString
+        );
+        const todos = [
+            { ...habit.todos[0], dates: namelessDates },
+            ...habit.todos.slice(1),
+            todo,
+        ];
 
         setHabits((prevHabits) =>
             prevHabits
                 .slice(0, index)
-                .concat({ ...habit, todos: [...habit.todos, todo] })
+                .concat({ ...habit, todos })
                 .concat(prevHabits.slice(index + 1))
         );
+        add_todo(habitId, todo);
     }
 
     function delete_todo(habitId, todoId) {

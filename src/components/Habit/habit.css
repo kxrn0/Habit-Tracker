@@ -80,6 +80,7 @@
     border-radius: 0.5rem;
     align-self: stretch;
     line-height: 1.25rem;
+    max-height: 15rem;
 }
 
 .habit .settings {
