@@ -14,6 +14,7 @@ dist-ssr
 *.local.*
 
 firebase_config.js
+firebase-debug.log
 
 # Editor directories and files
 .vscode/*
