@@ -6,29 +6,44 @@ import Tags from "../Tags/Tags";
 import Todo from "../Todo/Todo";
 import ten_print from "../../utilities/ten_print";
 import valid_file_type from "../../utilities/valid_file_type";
+import { serverTimestamp } from "firebase/firestore";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { nanoid } from "nanoid";
 
 export default function Content({ add_habit }) {
     const [tags, setTags] = useState([]);
     const [todos, setTodos] = useState([
         {
             name: null,
-            id: Math.random().toString(16).slice(-10),
+            id: nanoid(),
             range: { from: "free", to: "free" },
             dates: [],
         },
     ]);
-    const [src, setSrc] = useState(() => ten_print(500, 500));
+    const [src, setSrc] = useState(null);
+    const [file, setFile] = useState(null);
     const [difficulty, setDifficulty] = useState(0);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const submitButtonRef = useRef(null);
 
+    //#region
+
     function handle_file_input(event) {
         const file = event.target.files[0];
 
-        if (valid_file_type(file)) setSrc(URL.createObjectURL(file));
+        if (valid_file_type(file)) {
+            const reader = new FileReader();
+
+            reader.readAsDataURL(file);
+            reader.addEventListener("load", (event) =>
+                setSrc(event.target.result)
+            );
+
+            setFile(file);
+            setSrc(URL.createObjectURL(file));
+        }
     }
 
     function update_difficulty(event) {
@@ -62,7 +77,7 @@ export default function Content({ add_habit }) {
         const todo = {
             name: `TODO ${todos.length}`,
             range: { from: "free", to: "free" },
-            id: Math.random().toString(16).slice(-10),
+            id: nanoid(),
             dates: [],
         };
 
@@ -150,16 +165,41 @@ export default function Content({ add_habit }) {
     function create_new_habit(event) {
         event.preventDefault();
 
-        add_habit({
-            name,
-            description,
-            id: Math.random().toString(16).slice(-10),
-            difficulty,
-            tags,
-            image: src,
-            todos,
+        add_habit(
+            {
+                name,
+                description,
+                id: nanoid(),
+                difficulty,
+                tags,
+                // todos,
+                timestamp: serverTimestamp(),
+            },
+            file,
+            // tags,
+            todos.map((todo) => ({ ...todo, timestamp: serverTimestamp() }))
+        );
+    }
+
+    async function create_image_file() {
+        const file = await ten_print(500, 500);
+
+        setFile(file);
+        setSrc(() => {
+            const reader = new FileReader();
+
+            reader.readAsDataURL(file);
+            reader.addEventListener("load", (event) =>
+                setSrc(event.target.result)
+            );
         });
     }
+
+    //#endregion
+
+    useEffect(() => {
+        create_image_file();
+    }, []);
 
     return (
         <form onSubmit={create_new_habit} className="creation-content">
@@ -185,7 +225,7 @@ export default function Content({ add_habit }) {
                         <button
                             className="delete-image"
                             type="button"
-                            onClick={() => setSrc(ten_print(500, 500))}
+                            onClick={create_image_file}
                         ></button>
                     }
                 />

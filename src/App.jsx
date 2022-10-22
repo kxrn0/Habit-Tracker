@@ -16,30 +16,140 @@ import {
     change_todo_name,
 } from "./data";
 
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Info from "./components/Info/Info";
-
 import Habit from "./components/Habit/Habit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./css/style.css";
 import "./css/custom_checkbox.css";
 import Homepage from "./components/Homepage/Homepage";
 import Underlink from "./components/Underlink/Underlink";
-
 import homeIcon from "./assets/home-circle.svg";
 import infoIcon from "./assets/information.svg";
+import logOutIcon from "./assets/logout.svg";
 import date_in_range from "./utilities/date_in_range";
 
+import firebaseConfig from "./firebase_config";
+import { initializeApp } from "firebase/app";
+import {
+    getAuth,
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+} from "firebase/auth";
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    query,
+    orderBy,
+    onSnapshot,
+    updateDoc,
+    doc,
+    serverTimestamp,
+    getDoc,
+    deleteDoc,
+    where,
+    getDocs,
+} from "firebase/firestore";
+import {
+    getStorage,
+    ref,
+    uploadBytesResumable,
+    getDownloadURL,
+    deleteObject,
+} from "firebase/storage";
+
 function App() {
-    const [habits, setHabits] = useState(() =>
-        JSON.parse(JSON.stringify(habitsData))
-    );
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [habits, setHabits] = useState([]);
 
-    function add_new_habit(habit) {
-        add_habit(habit);
+    async function sign_in() {
+        const provider = new GoogleAuthProvider();
 
-        setHabits((prevHabits) => [...prevHabits, habit]);
+        await signInWithPopup(getAuth(), provider);
+    }
+
+    function sign_out() {
+        signOut(getAuth());
+    }
+
+    async function create_habit(habit, file, todos) {
+        try {
+            let byme = "https://www.google.com/images/spin-32.gif";
+
+            habit.image = byme;
+
+            const userId = getAuth().currentUser.uid;
+            const habitRef = await addDoc(
+                collection(getFirestore(), `users/${userId}/habits`),
+                habit
+            );
+
+            const todosCollRef = collection(habitRef, "todos");
+
+            const filePath = `users/${userId}/${file.name}`;
+            const habitImageRef = ref(getStorage(), filePath);
+            const fileSnapshot = await uploadBytesResumable(
+                habitImageRef,
+                file
+            );
+            const imageURL = await getDownloadURL(habitImageRef);
+            const storageURI = fileSnapshot.metadata.fullPath;
+
+            await addDoc(todosCollRef, { todos });
+
+            await updateDoc(habitRef, {
+                image: imageURL,
+                storageURI,
+                refId: habitRef.id,
+            });
+        } catch (wrror) {
+            console.log(`ERROR : ${wrror}`);
+        }
+    }
+
+    async function switch_image(habit, image) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const imageRef = ref(getStorage(), habit.storageURI);
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits`,
+                habit.refId
+            );
+            const filePath = `users/${userId}/${habit.refId}/${image.name}`;
+            const habitImageRef = ref(getStorage(), filePath);
+            let fileSnapshot, imageURL, storageURI;
+
+            updateDoc(docRef, {
+                image: "https://www.google.com/images/spin-32.gif",
+            });
+            fileSnapshot = await uploadBytesResumable(habitImageRef, image);
+            imageURL = await getDownloadURL(habitImageRef);
+            storageURI = fileSnapshot.metadata.fullPath;
+
+            await updateDoc(docRef, { image: imageURL, storageURI });
+            await deleteObject(imageRef);
+        } catch (wrror) {
+            console.log(`ERROR WHILE ATTEMPMTING TO REPLACE IMAGE: ${wrror}`);
+        }
+    }
+
+    async function update_detail(habitId, detail) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits`,
+                habitId
+            );
+
+            await updateDoc(docRef, { [detail.label]: detail.value });
+        } catch (wrror) {
+            console.log(`ERROR UPDATING DETAIL: ${wrror}`);
+        }
     }
 
     function update(habitId, todoId, date) {
@@ -55,7 +165,6 @@ function App() {
             );
             const todo = habit.todos[todoIndex];
             let dates, newTodo, todos;
-
             dates = [...todo.dates];
             if (dates.includes(date))
                 dates = dates.filter((other) => other !== date);
@@ -72,91 +181,6 @@ function App() {
                 .concat({ ...habit, todos })
                 .concat(prevHabits.slice(habitIndex + 1));
         });
-    }
-
-    function update_difficulty(habitId, difficulty) {
-        update_habits_data_difficulty(habitId, difficulty);
-
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, difficulty })
-                .concat(prevHabits.slice(index + 1))
-        );
-    }
-
-    function remove_tag(habitId, tag) {
-        remove_tag_from_habit(habitId, tag);
-
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-        const tags = habit.tags.filter((other) => other !== tag);
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, tags })
-                .concat(prevHabits.slice(index + 1))
-        );
-    }
-
-    function add_tag(habitId, tag) {
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-        const tags = [...habit.tags, tag];
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, tags })
-                .concat(prevHabits.slice(index + 1))
-        );
-        add_tag_from_habit(habitId, tag);
-    }
-
-    function update_image(habitId, image) {
-        change_image(habitId, image);
-
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, image })
-                .concat(prevHabits.slice(index + 1))
-        );
-    }
-
-    function update_name(habitId, name) {
-        change_name(habitId, name);
-
-        const index = habits.findIndex((habit) => habit.id === habit.id);
-        const habit = habits[index];
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, name })
-                .concat(prevHabits.slice(index + 1))
-        );
-    }
-
-    function update_description(habitId, description) {
-        change_description(habitId, description);
-
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, description })
-                .concat(prevHabits.slice(index + 1))
-        );
     }
 
     function remove_habit(habitId) {
@@ -280,8 +304,69 @@ function App() {
         );
     }
 
+    function load_habits() {
+        const userId = getAuth().currentUser.uid;
+        const habitsQuery = query(
+            collection(getFirestore(), `users/${userId}/habits`),
+            orderBy("timestamp", "asc")
+        );
+
+        onSnapshot(habitsQuery, (snapshot) =>
+            snapshot.docChanges().forEach(async (change) => {
+                if (change.type === "removed")
+                    setHabits((prevHabits) =>
+                        prevHabits.filter((habit) => habit.id !== change.doc.id)
+                    );
+                else {
+                    const habit = change.doc.data();
+
+                    const todosQuery = query(
+                        collection(
+                            getFirestore(),
+                            `users/${userId}/habits/${habit.refId}/todos`
+                        ),
+                        orderBy("timestamp", "asc")
+                    );
+                    const todosQuerySnapshot = await getDocs(todosQuery);
+                    todosQuerySnapshot.forEach((todoShot) =>
+                        console.log(todoShot.data())
+                    );
+
+                    console.log(todosQuerySnapshot);
+
+                    console.log(`hi ${Math.random()}`);
+
+                    setHabits((prevHabits) => {
+                        const index = prevHabits.findIndex(
+                            (other) => other.id === habit.id
+                        );
+
+                        if (!~index) return [...prevHabits, habit];
+                        else
+                            return prevHabits
+                                .slice(0, index)
+                                .concat(habit)
+                                .concat(prevHabits.slice(index + 1));
+                    });
+                }
+            })
+        );
+    }
+
+    useEffect(() => {
+        initializeApp(firebaseConfig);
+    }, []);
+
+    useEffect(() => {
+        onAuthStateChanged(getAuth(), () => {
+            setIsLoggedIn(() => !!getAuth().currentUser);
+            if (getAuth().currentUser) load_habits();
+        });
+    }, []);
+
     return (
         <div className="App">
+            <button onClick={() => console.log(habits)}>Jinbocho</button>
             <BrowserRouter>
                 <nav className="navbar">
                     <div className="logo">Kerosene</div>
@@ -295,45 +380,55 @@ function App() {
                                 icon={infoIcon}
                             />
                         </li>
+                        {isLoggedIn ? (
+                            <li>
+                                <button
+                                    className="log-out-button"
+                                    onClick={sign_out}
+                                ></button>
+                            </li>
+                        ) : null}
                     </ul>
                 </nav>
-                <Routes>
-                    <Route
-                        element={
-                            <Homepage
-                                habits={habits}
-                                update={update}
-                                add_habit={add_new_habit}
-                            />
-                        }
-                        path="/Habit-Tracker"
-                    />
-                    <Route element={<Info />} path="/Habit-Tracker/info" />
-                    {habits.map((habit) => (
+                {isLoggedIn ? (
+                    <Routes>
                         <Route
-                            key={habit.id}
-                            path={`/Habit-Tracker/habits/${habit.id}`}
                             element={
-                                <Habit
-                                    habit={habit}
-                                    update_cell={update}
-                                    update_difficulty={update_difficulty}
-                                    remove_tag={remove_tag}
-                                    add_tag={add_tag}
-                                    change_image={update_image}
-                                    change_name={update_name}
-                                    change_description={update_description}
-                                    remove_habit={remove_habit}
-                                    toggle_habit_range={toggle_habit_range}
-                                    add_todo_to_habit={add_todo_to_habit}
-                                    delete_todo={delete_todo}
-                                    rename_todo={rename_todo}
+                                <Homepage
+                                    habits={habits}
+                                    update={update}
+                                    add_habit={create_habit}
                                 />
                             }
+                            path="/Habit-Tracker"
                         />
-                    ))}
-                    <Route path="*" element={<p>Not found</p>} />
-                </Routes>
+                        <Route element={<Info />} path="/Habit-Tracker/info" />
+                        {habits.map((habit) => (
+                            <Route
+                                key={habit.id}
+                                path={`/Habit-Tracker/habits/${habit.id}`}
+                                element={
+                                    <Habit
+                                        habit={habit}
+                                        update_cell={update}
+                                        update_detail={update_detail}
+                                        change_image={switch_image}
+                                        remove_habit={remove_habit}
+                                        toggle_habit_range={toggle_habit_range}
+                                        add_todo_to_habit={add_todo_to_habit}
+                                        delete_todo={delete_todo}
+                                        rename_todo={rename_todo}
+                                    />
+                                }
+                            />
+                        ))}
+                        <Route path="*" element={<p>Not found</p>} />
+                    </Routes>
+                ) : (
+                    <div className="sign-in-content">
+                        <button onClick={sign_in}>Log In</button>
+                    </div>
+                )}
                 <footer className="footer">
                     A project by{" "}
                     <a href="https://ol.reddit.com/u/_by_me" target="_blank">

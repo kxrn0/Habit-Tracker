@@ -13,12 +13,8 @@ import "./habit.css";
 export default function Habit({
     habit,
     update_cell,
-    update_difficulty,
-    remove_tag,
-    add_tag,
+    update_detail,
     change_image,
-    change_name,
-    change_description,
     remove_habit,
     toggle_habit_range,
     add_todo_to_habit,
@@ -42,15 +38,22 @@ export default function Habit({
         else if (id === "medium") difficulty = 1;
         else difficulty = 0;
 
-        update_difficulty(habit.id, difficulty);
+        update_detail(habit.refId, { label: "difficulty", value: difficulty });
     }
 
     function add_new_tag(tag) {
-        if (!habit.tags.includes(tag)) add_tag(habit.id, tag);
+        if (!habit.tags.includes(tag))
+            update_detail(habit.refId, {
+                label: "tags",
+                value: [...habit.tags, tag],
+            });
     }
 
     function remove_old_tag(tag) {
-        remove_tag(habit.id, tag);
+        update_detail(habit.refId, {
+            label: "tags",
+            value: habit.tags.filter((other) => other !== tag),
+        });
     }
 
     function close_image() {
@@ -60,8 +63,7 @@ export default function Habit({
     function handle_image_input(event) {
         const file = event.target.files[0];
 
-        if (valid_file_type(file))
-            change_image(habit.id, URL.createObjectURL(file));
+        if (valid_file_type(file)) change_image(habit, file);
     }
 
     function update_local_name(event) {
@@ -72,7 +74,7 @@ export default function Habit({
         const value = localName.trim();
 
         if (value && value !== habit.name) {
-            change_name(habit.id, value);
+            update_detail(habit.refId, { label: "name", value });
             setLocalName(value);
         } else setLocalName(habit.name);
         setIsNameChanging(false);
@@ -96,7 +98,10 @@ export default function Habit({
         const value = localDescription.trim();
 
         if (value && value !== habit.description) {
-            change_description(habit.id, value);
+            update_detail(habit.refId, {
+                label: "description",
+                value,
+            });
             setLocalDescription(value);
         } else setLocalDescription(habit.description);
         setIsDescribing(false);
@@ -332,7 +337,7 @@ export default function Habit({
             </div>
             <Grid habit={habit} update={update_cell} />
             <div className="todos">
-                <p className="title">Todos</p>
+                <p className="title">TODO</p>
                 <button className="add-todo" onClick={add_todo}></button>
                 <div className="todo-list">
                     {habit.todos.map((todo) => {

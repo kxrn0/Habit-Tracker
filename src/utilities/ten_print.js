@@ -56,5 +56,11 @@ export default function ten_print(width, height) {
             }
             context.stroke();
         }
-    return canvas.toDataURL();
+    return new Promise((resolve) => {
+        const name = `${Math.random().toString(16).slice(-10)}.png`;
+
+        canvas.toBlob((blob) =>
+            resolve(new File([blob], name, { type: "image/png" }))
+        );
+    });
 }

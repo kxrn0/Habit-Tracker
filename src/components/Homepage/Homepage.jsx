@@ -141,10 +141,10 @@ export default function Homepage({ habits, update, add_habit }) {
         setCurrentShownTags([...allTags]);
     }
 
-    function add_new_habit(habit) {
+    function add_new_habit(habit, file, todos) {
         clear_all_tags(habit.tags);
         close_screen();
-        add_habit(habit);
+        add_habit(habit, file, todos);
     }
 
     function set_up_screen() {
