@@ -15,6 +15,9 @@ export default function Stick({ habit, update }) {
     const presentTime = start(presentDay);
     let currentDate;
 
+    // console.log(habit);
+    // console.log("------------------");
+
     currentDate = presentTime;
 
     for (let i = 0; i < 7; i++) {
@@ -49,6 +52,7 @@ export default function Stick({ habit, update }) {
                     if (date_in_range(currentDate, todo.range))
                         element.tasks.push({
                             id: todo.id,
+                            refId: todo.refId,
                             checked: todo.dates.includes(stringDate),
                             name: todo.name,
                         });
@@ -115,8 +119,8 @@ export default function Stick({ habit, update }) {
                                             checked={day.tasks[0].checked}
                                             onChange={() =>
                                                 update(
-                                                    habit.id,
-                                                    todo.id,
+                                                    habit.refId,
+                                                    todo.refId,
                                                     day.stringDate
                                                 )
                                             }
@@ -131,7 +135,7 @@ export default function Stick({ habit, update }) {
                                         mainContent={day.day}
                                         toolContent={
                                             <ToolContent
-                                                habitId={habit.id}
+                                                habitId={habit.refId}
                                                 cell={day}
                                                 update={update}
                                             />

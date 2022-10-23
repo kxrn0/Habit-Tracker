@@ -1,33 +1,34 @@
+const colors = [
+    {
+        bg: "rgb(20, 5, 10)",
+        right: "rgb(255, 10, 50)",
+        left: "rgb(10, 255, 50)",
+    },
+    {
+        bg: "rgb(50, 150, 255)",
+        right: "rgb(25, 7, 10)",
+        left: "rgb(250, 255, 253)",
+    },
+    {
+        bg: "rgb(255, 100, 200)",
+        right: "rgb(255, 200, 250)",
+        left: "rgb(100, 24, 150)",
+    },
+    {
+        bg: "rgb(25, 255, 50)",
+        right: "rgb(255, 10, 54)",
+        left: "rgb(175, 190, 255)",
+    },
+    {
+        bg: "rgb(255, 220, 250)",
+        right: "rgb(10, 12, 255)",
+        left: "rgb(200, 10, 20)",
+    },
+];
+
 export default function ten_print(width, height) {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
-    const colors = [
-        {
-            bg: "rgb(20, 5, 10)",
-            right: "rgb(255, 10, 50)",
-            left: "rgb(10, 255, 50)",
-        },
-        {
-            bg: "rgb(50, 150, 255)",
-            right: "rgb(25, 7, 10)",
-            left: "rgb(250, 255, 253)",
-        },
-        {
-            bg: "rgb(255, 100, 200)",
-            right: "rgb(255, 200, 250)",
-            left: "rgb(100, 24, 150)",
-        },
-        {
-            bg: "rgb(25, 255, 50)",
-            right: "rgb(255, 10, 54)",
-            left: "rgb(175, 190, 255)",
-        },
-        {
-            bg: "rgb(255, 220, 250)",
-            right: "rgb(10, 12, 255)",
-            left: "rgb(200, 10, 20)",
-        },
-    ];
     let edge, cellsX, cellsY, color;
 
     canvas.width = width;

@@ -15,7 +15,7 @@ export default function ToolContent({ habitId, cell, update }) {
                             type="checkbox"
                             checked={task.checked}
                             onChange={() =>
-                                update(habitId, task.id, stringDate)
+                                update(habitId, task.refId, stringDate)
                             }
                         />
                         <label htmlFor={`task-${task.id}-${date}`}>

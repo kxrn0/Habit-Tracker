@@ -8,7 +8,7 @@ export let habitsData = [
     {
         name: "0 push up sets, this is a string",
         description:
-            "After spending everyday hard at work fighting for america, getting fucked by all the other countries leaders, as well as politicians here at home, each night is just finally able to fall asleep while expelling a low continuous queef letting out the hot air that has built up in, the tropical breeze that accumulated in her nethers as she's in and out of meetings on and off the phone shouting `that's not good enough that's not good enough that's not good`",
+            "this is a string, there are many like it, but this one is mine",
         id: "123",
         difficulty: 0,
         tags: ["one", "three", "four", "two", "five", "six", "seven", "eight"],

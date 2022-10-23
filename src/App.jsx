@@ -26,7 +26,6 @@ import Homepage from "./components/Homepage/Homepage";
 import Underlink from "./components/Underlink/Underlink";
 import homeIcon from "./assets/home-circle.svg";
 import infoIcon from "./assets/information.svg";
-import logOutIcon from "./assets/logout.svg";
 import date_in_range from "./utilities/date_in_range";
 
 import firebaseConfig from "./firebase_config";
@@ -86,9 +85,7 @@ function App() {
                 collection(getFirestore(), `users/${userId}/habits`),
                 habit
             );
-
             const todosCollRef = collection(habitRef, "todos");
-
             const filePath = `users/${userId}/${file.name}`;
             const habitImageRef = ref(getStorage(), filePath);
             const fileSnapshot = await uploadBytesResumable(
@@ -98,7 +95,11 @@ function App() {
             const imageURL = await getDownloadURL(habitImageRef);
             const storageURI = fileSnapshot.metadata.fullPath;
 
-            await addDoc(todosCollRef, { todos });
+            for (let i = 0; i < todos.length; i++) {
+                const todoRef = await addDoc(todosCollRef, todos[i]);
+
+                await updateDoc(todoRef, { refId: todoRef.id });
+            }
 
             await updateDoc(habitRef, {
                 image: imageURL,
@@ -142,13 +143,33 @@ function App() {
             const userId = getAuth().currentUser.uid;
             const docRef = doc(
                 getFirestore(),
-                `users/${userId}/habits`,
-                habitId
+                `users/${userId}/habits/${habitId}`
             );
 
             await updateDoc(docRef, { [detail.label]: detail.value });
         } catch (wrror) {
             console.log(`ERROR UPDATING DETAIL: ${wrror}`);
+        }
+    }
+
+    async function check_habit(habitId, todoId, date) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}/todos/${todoId}`
+            );
+            const docSnap = await getDoc(docRef);
+            let dates;
+
+            dates = docSnap.data().dates;
+            if (dates.includes(date))
+                dates = dates.filter((other) => other !== date);
+            else dates.push(date);
+
+            await updateDoc(docRef, { dates });
+        } catch (wrror) {
+            console.log(wrror);
         }
     }
 
@@ -319,22 +340,37 @@ function App() {
                     );
                 else {
                     const habit = change.doc.data();
+                    const todosCollection = collection(
+                        getFirestore(),
+                        `users/${userId}/habits/${habit.refId}/todos`
+                    );
+                    const todosDocs = await getDocs(todosCollection);
+                    const todos = [];
+
+                    //[...
 
                     const todosQuery = query(
                         collection(
                             getFirestore(),
-                            `users/${userId}/habits/${habit.refId}/todos`
-                        ),
-                        orderBy("timestamp", "asc")
-                    );
-                    const todosQuerySnapshot = await getDocs(todosQuery);
-                    todosQuerySnapshot.forEach((todoShot) =>
-                        console.log(todoShot.data())
+                            `user/${userId}/habits/${habit.refId}/todos`
+                        )
                     );
 
-                    console.log(todosQuerySnapshot);
+                    onSnapshot(todosQuery, (shotSnap) =>
+                        shotSnap.docChanges().forEach((update) => {
+                            console.log("hi");
+                            console.log(update.doc.data());
+                        })
+                    );
 
-                    console.log(`hi ${Math.random()}`);
+                    //...]
+
+                    todosDocs.forEach((todo) => todos.push(todo.data()));
+
+                    todos.sort(
+                        (a, b) =>
+                            a.timestamp.nanoseconds - b.timestamp.nanoseconds
+                    );
 
                     setHabits((prevHabits) => {
                         const index = prevHabits.findIndex(
@@ -345,7 +381,7 @@ function App() {
                         else
                             return prevHabits
                                 .slice(0, index)
-                                .concat(habit)
+                                .concat({ ...habit, todos })
                                 .concat(prevHabits.slice(index + 1));
                     });
                 }
@@ -366,7 +402,6 @@ function App() {
 
     return (
         <div className="App">
-            <button onClick={() => console.log(habits)}>Jinbocho</button>
             <BrowserRouter>
                 <nav className="navbar">
                     <div className="logo">Kerosene</div>
@@ -396,7 +431,8 @@ function App() {
                             element={
                                 <Homepage
                                     habits={habits}
-                                    update={update}
+                                    // update={update}
+                                    update={check_habit}
                                     add_habit={create_habit}
                                 />
                             }

@@ -172,11 +172,9 @@ export default function Content({ add_habit }) {
                 id: nanoid(),
                 difficulty,
                 tags,
-                // todos,
                 timestamp: serverTimestamp(),
             },
             file,
-            // tags,
             todos.map((todo) => ({ ...todo, timestamp: serverTimestamp() }))
         );
     }
