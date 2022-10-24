@@ -15,7 +15,7 @@ export default function Habit({
     update_cell,
     update_detail,
     change_image,
-    remove_habit,
+    delete_habit,
     toggle_habit_range,
     add_todo_to_habit,
     delete_todo,
@@ -109,10 +109,6 @@ export default function Habit({
 
     function close_delete_screen() {
         setIsAboutToDelete(false);
-    }
-
-    function delete_habit() {
-        remove_habit(habit.id);
     }
 
     function toggle_range(todoId, currentValue, side) {
@@ -221,8 +217,11 @@ export default function Habit({
                         <p>Do you really wish to delete</p>
                         <p className="element-name">{habit.name}</p>
                         <div className="delete-controls">
-                            <button className="delete" onClick={delete_habit}>
-                                <Link to="/Habit-Tracker">Delete</Link>
+                            <button
+                                className="delete"
+                                onClick={() => delete_habit(habit.refId)}
+                            >
+                                Delete
                             </button>
                             <button
                                 className="cancel"

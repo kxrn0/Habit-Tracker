@@ -182,11 +182,7 @@
 
 .habit .delete-message .delete-controls .delete {
     background: rgb(224, 66, 66);
-}
-
-.habit .delete-message .delete-controls .delete a {
     color: azure;
-    text-decoration: none;
 }
 
 .habit .delete-message .delete-controls .cancel {

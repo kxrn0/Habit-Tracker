@@ -152,6 +152,33 @@ function App() {
         }
     }
 
+    function compute_check(prevHabits, habitId, todoId, date) {
+        const habitIndex = habits.findIndex((habit) => habit.refId === habitId);
+        const habit = habits[habitIndex];
+        const todoIndex = habit.todos.findIndex(
+            (todo) => todo.refId === todoId
+        );
+        const todo = habit.todos[todoIndex];
+        let dates, newTodo, todos;
+
+        dates = [...todo.dates];
+
+        if (dates.includes(date))
+            dates = dates.filter((other) => other !== date);
+        else dates.push(date);
+
+        newTodo = { ...todo, dates };
+        todos = habit.todos
+            .slice(0, todoIndex)
+            .concat(newTodo)
+            .concat(habit.todos.slice(todoIndex + 1));
+
+        return prevHabits
+            .slice(0, habitIndex)
+            .concat({ ...habit, todos })
+            .concat(prevHabits.slice(habitIndex + 1));
+    }
+
     async function check_habit(habitId, todoId, date) {
         try {
             const userId = getAuth().currentUser.uid;
@@ -161,6 +188,10 @@ function App() {
             );
             const docSnap = await getDoc(docRef);
             let dates;
+
+            setHabits((prevHabits) =>
+                compute_check(prevHabits, habitId, todoId, date)
+            );
 
             dates = docSnap.data().dates;
             if (dates.includes(date))
@@ -173,35 +204,20 @@ function App() {
         }
     }
 
-    function update(habitId, todoId, date) {
-        update_habit_by_id(habitId, todoId, date);
-
-        setHabits((prevHabits) => {
-            const habitIndex = habits.findIndex(
-                (habit) => habit.id === habitId
+    async function delete_habit(habitId) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}`
             );
-            const habit = habits[habitIndex];
-            const todoIndex = habit.todos.findIndex(
-                (todo) => todo.id === todoId
-            );
-            const todo = habit.todos[todoIndex];
-            let dates, newTodo, todos;
-            dates = [...todo.dates];
-            if (dates.includes(date))
-                dates = dates.filter((other) => other !== date);
-            else dates.push(date);
 
-            newTodo = { ...todo, dates };
-            todos = habit.todos
-                .slice(0, todoIndex)
-                .concat(newTodo)
-                .concat(habit.todos.slice(todoIndex + 1));
+            await deleteDoc(docRef);
 
-            return prevHabits
-                .slice(0, habitIndex)
-                .concat({ ...habit, todos })
-                .concat(prevHabits.slice(habitIndex + 1));
-        });
+            window.location.href = "/";
+        } catch (wrror) {
+            console.log(`ERROR, COULDN'T DELETE HABIT : ${wrror}`);
+        }
     }
 
     function remove_habit(habitId) {
@@ -325,7 +341,7 @@ function App() {
         );
     }
 
-    function load_habits() {
+    async function load_habits() {
         const userId = getAuth().currentUser.uid;
         const habitsQuery = query(
             collection(getFirestore(), `users/${userId}/habits`),
@@ -347,30 +363,10 @@ function App() {
                     const todosDocs = await getDocs(todosCollection);
                     const todos = [];
 
-                    //[...
-
-                    const todosQuery = query(
-                        collection(
-                            getFirestore(),
-                            `user/${userId}/habits/${habit.refId}/todos`
-                        )
-                    );
-
-                    onSnapshot(todosQuery, (shotSnap) =>
-                        shotSnap.docChanges().forEach((update) => {
-                            console.log("hi");
-                            console.log(update.doc.data());
-                        })
-                    );
-
-                    //...]
-
                     todosDocs.forEach((todo) => todos.push(todo.data()));
 
-                    todos.sort(
-                        (a, b) =>
-                            a.timestamp.nanoseconds - b.timestamp.nanoseconds
-                    );
+                    console.log(todos);
+                    todos.sort((a, b) => a.index - b.index);
 
                     setHabits((prevHabits) => {
                         const index = prevHabits.findIndex(
@@ -446,10 +442,11 @@ function App() {
                                 element={
                                     <Habit
                                         habit={habit}
-                                        update_cell={update}
+                                        // update_cell={update}
+                                        update_cell={check_habit}
                                         update_detail={update_detail}
                                         change_image={switch_image}
-                                        remove_habit={remove_habit}
+                                        delete_habit={delete_habit}
                                         toggle_habit_range={toggle_habit_range}
                                         add_todo_to_habit={add_todo_to_habit}
                                         delete_todo={delete_todo}

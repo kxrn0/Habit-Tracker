@@ -19,6 +19,7 @@ export default function Content({ add_habit }) {
             id: nanoid(),
             range: { from: "free", to: "free" },
             dates: [],
+            index: 0
         },
     ]);
     const [src, setSrc] = useState(null);
@@ -79,6 +80,7 @@ export default function Content({ add_habit }) {
             range: { from: "free", to: "free" },
             id: nanoid(),
             dates: [],
+            index: todos.length,
         };
 
         setTodos((prevTodos) => [...prevTodos, todo]);
@@ -86,7 +88,11 @@ export default function Content({ add_habit }) {
     }
 
     function delete_todo(id) {
-        setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+        setTodos((prevTodos) =>
+            prevTodos
+                .filter((other) => other.id !== id)
+                .map((todo, index) => ({ ...todo, index }))
+        );
     }
 
     function change_todo_name(todoId, name) {
@@ -175,7 +181,7 @@ export default function Content({ add_habit }) {
                 timestamp: serverTimestamp(),
             },
             file,
-            todos.map((todo) => ({ ...todo, timestamp: serverTimestamp() }))
+            todos
         );
     }
 

@@ -63,6 +63,7 @@ export default function Grid({ update, habit }) {
                 if (toAdd) {
                     if (date_in_range(currentDate, todo.range))
                         cell.tasks.push({
+                            refId: todo.refId,
                             id: todo.id,
                             checked: todo.dates.includes(stringDate),
                             name: todo.name,
@@ -137,7 +138,7 @@ export default function Grid({ update, habit }) {
                                     mainContent={cell.number}
                                     toolContent={
                                         <ToolContent
-                                            habitId={habit.id}
+                                            habitId={habit.refId}
                                             cell={cell}
                                             update={update}
                                         />
