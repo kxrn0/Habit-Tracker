@@ -8,9 +8,11 @@ export default function Todo({
     change_name,
     toggle_range,
     change_date,
+    onlyLocal,
 }) {
     const [name, setName] = useState(todo.name);
     const [changing, setChanging] = useState(false);
+    const [id, _] = useState(() => (onlyLocal ? todo.id : todo.refId));
     const inputRef = useRef(null);
 
     function update_local_name(event) {
@@ -21,7 +23,7 @@ export default function Todo({
         const value = name.trim();
 
         if (value && value !== todo.name) {
-            change_name(todo.id, value);
+            change_name(id, value);
             setName(value);
         } else setName(todo.name);
         setChanging(false);
@@ -32,12 +34,16 @@ export default function Todo({
         setTimeout(() => inputRef.current.focus(), 33);
     }
 
+    function remove_todo() {
+        delete_todo(id);
+    }
+
     return (
         <div className="todo">
             <button
                 className="delete-todo"
                 type="button"
-                onClick={() => delete_todo(todo.id)}
+                onClick={remove_todo}
             ></button>
             <div className="todo-name">
                 <p className="label">Name: </p>
@@ -81,7 +87,7 @@ export default function Todo({
                             checked={todo.range.from !== "free"}
                             change={() =>
                                 toggle_range(
-                                    todo.id,
+                                    id,
                                     todo.range.from !== "free",
                                     "from"
                                 )
@@ -97,7 +103,7 @@ export default function Todo({
                                     }
                                     onChange={(event) =>
                                         change_date(
-                                            todo.id,
+                                            id,
                                             "from",
                                             event.target.value
                                         )
@@ -114,7 +120,7 @@ export default function Todo({
                             checked={todo.range.to === "free"}
                             change={() =>
                                 toggle_range(
-                                    todo.id,
+                                    id,
                                     todo.range.to === "free",
                                     "to"
                                 )
@@ -129,7 +135,7 @@ export default function Todo({
                                     }
                                     onChange={(event) =>
                                         change_date(
-                                            todo.id,
+                                            id,
                                             "to",
                                             event.target.value
                                         )

@@ -56,6 +56,8 @@ export default function Homepage({ habits, update, add_habit }) {
     const [aside, setAside] = useState(false);
     const sticks = habits
         .map((habit) => {
+            if (!habit.todos.length) return null;
+
             const method = orFilter ? "some" : "every";
 
             if (

@@ -7,7 +7,6 @@ import Todo from "../Todo/Todo";
 import ten_print from "../../utilities/ten_print";
 import valid_file_type from "../../utilities/valid_file_type";
 import { serverTimestamp } from "firebase/firestore";
-
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 
@@ -19,7 +18,7 @@ export default function Content({ add_habit }) {
             id: nanoid(),
             range: { from: "free", to: "free" },
             dates: [],
-            index: 0
+            index: 0,
         },
     ]);
     const [src, setSrc] = useState(null);
@@ -178,7 +177,7 @@ export default function Content({ add_habit }) {
                 id: nanoid(),
                 difficulty,
                 tags,
-                timestamp: serverTimestamp(),
+                timestamp: serverTimestamp()
             },
             file,
             todos
@@ -285,6 +284,7 @@ export default function Content({ add_habit }) {
                                     change_name={change_todo_name}
                                     toggle_range={toggle_range}
                                     change_date={change_date}
+                                    onlyLocal={true}
                                 />
                             )
                     )}

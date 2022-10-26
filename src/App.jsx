@@ -1,21 +1,3 @@
-import {
-    habitsData,
-    update_habits_data_difficulty,
-    update_habit_by_id,
-    remove_tag_from_habit,
-    add_tag_from_habit,
-    add_habit,
-    change_image,
-    change_name,
-    change_description,
-    delete_habit,
-    change_range,
-    relocate,
-    add_todo,
-    remove_todo,
-    change_todo_name,
-} from "./data";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Info from "./components/Info/Info";
 import Habit from "./components/Habit/Habit";
@@ -46,10 +28,8 @@ import {
     onSnapshot,
     updateDoc,
     doc,
-    serverTimestamp,
     getDoc,
     deleteDoc,
-    where,
     getDocs,
 } from "firebase/firestore";
 import {
@@ -59,6 +39,7 @@ import {
     getDownloadURL,
     deleteObject,
 } from "firebase/storage";
+import { nanoid } from "nanoid";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,7 +58,6 @@ function App() {
     async function create_habit(habit, file, todos) {
         try {
             let byme = "https://www.google.com/images/spin-32.gif";
-
             habit.image = byme;
 
             const userId = getAuth().currentUser.uid;
@@ -220,20 +200,41 @@ function App() {
         }
     }
 
-    function remove_habit(habitId) {
-        delete_habit(habitId);
+    async function toggle_habit_range(habitId, todoId, range, toRelocateId) {
+        // change_range(habitId, todoId, range);
+        // const habitIndex = habits.findIndex((habit) => habit.id === habitId);
+        // const habit = habits[habitIndex];
+        // const todoIndex = habit.todos.findIndex((todo) => todo.id === todoId);
+        // const todo = habit.todos[todoIndex];
+        // const dates = todo.dates.filter((date) =>
+        //     date_in_range(new Date(date), range)
+        // );
+        // const todos = habit.todos
+        //     .slice(0, todoIndex)
+        //     .concat({ ...todo, range, dates })
+        //     .concat(habit.todos.slice(todoIndex + 1));
+        // let updatedHabits;
+        // updatedHabits = habits
+        //     .slice(0, habitIndex)
+        //     .concat({ ...habit, todos })
+        //     .concat(habits.slice(habitIndex + 1));
+        // if (toRelocateId) {
+        //     const result = relocate_data(updatedHabits, habit.id);
+        //     updatedHabits = result.data;
+        //     relocate(toRelocateId, result.todo);
+        // }
+        // setHabits(updatedHabits);
 
-        setHabits((prevHabits) =>
-            prevHabits.filter((habit) => habit.id !== habitId)
+        const userId = getAuth().currentUser.uid;
+        const todoRef = doc(
+            getFirestore(),
+            `users/${userId}/habits/${habitId}/todos/${todoId}`
         );
-    }
-
-    function toggle_habit_range(habitId, todoId, range, toRelocateId) {
-        change_range(habitId, todoId, range);
-
-        const habitIndex = habits.findIndex((habit) => habit.id === habitId);
+        const habitIndex = habits.findIndex((habit) => habit.refId === habitId);
         const habit = habits[habitIndex];
-        const todoIndex = habit.todos.findIndex((todo) => todo.id === todoId);
+        const todoIndex = habit.todos.findIndex(
+            (todo) => todo.refId === todoId
+        );
         const todo = habit.todos[todoIndex];
         const dates = todo.dates.filter((date) =>
             date_in_range(new Date(date), range)
@@ -250,52 +251,71 @@ function App() {
             .concat(habits.slice(habitIndex + 1));
 
         if (toRelocateId) {
-            const result = relocate_data(updatedHabits, habit.id);
+            const result = relocate_data(updatedHabits, habit.refId);
+            const namelessRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+            );
+            const namedOne = {
+                name: habit.name,
+                id: nanoid(),
+                range: { from: "free", to: "free" },
+                dates: [...habit.todos[0].dates],
+                index: habit.todos.length,
+            };
 
             updatedHabits = result.data;
-            relocate(toRelocateId, result.todo);
+
+            await updateDoc(namelessRef, { dates: [] });
+
+            add_todo_to_habit(habitId, namedOne);
         }
 
         setHabits(updatedHabits);
+
+        await updateDoc(todoRef, { range, dates });
     }
 
     function relocate_data(data, habitId) {
-        const index = data.findIndex((habit) => habit.id === habitId);
+        const index = data.findIndex((habit) => habit.refId === habitId);
         const habit = data[index];
         const todo = {
             name: habit.name,
-            id: Math.random().toString(16).slice(-10),
+            id: nanoid(),
             range: { from: "free", to: "free" },
             dates: [...habit.todos[0].dates],
         };
         const todos = [...habit.todos.slice(1), todo];
 
         todos.unshift({ ...habit.todos[0], dates: [] });
-
         return {
             data: data
                 .slice(0, index)
                 .concat({ ...habit, todos })
                 .concat(data.slice(index + 1)),
-            todo: todo,
+            todo,
         };
     }
 
-    function add_todo_to_habit(habitId, todo) {
-        const index = habits.findIndex((habit) => habit.id === habitId);
+    async function add_todo_to_habit(habitId, todo) {
+        const index = habits.findIndex((habit) => habit.refId === habitId);
         const habit = habits[index];
-        const today = new Date();
-        const todaysString = `${today.getFullYear()}-${String(
-            today.getMonth() + 1
-        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
         const namelessDates = habit.todos[0].dates.filter(
-            (date) => date != todaysString
+            (date) => date != todo.range.from
         );
         const todos = [
             { ...habit.todos[0], dates: namelessDates },
             ...habit.todos.slice(1),
             todo,
         ];
+        const userId = getAuth().currentUser.uid;
+        const todoCollection = collection(
+            getFirestore(),
+            `users/${userId}/habits/${habitId}/todos`
+        );
+        const todoRef = await addDoc(todoCollection, todo);
+
+        todo.refId = todoRef.id;
 
         setHabits((prevHabits) =>
             prevHabits
@@ -303,52 +323,99 @@ function App() {
                 .concat({ ...habit, todos })
                 .concat(prevHabits.slice(index + 1))
         );
-        add_todo(habitId, todo);
+
+        if (habit.todos[0].dates.some((date) => date === todo.range.from)) {
+            const namelessOneRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+            );
+            const updatedDates = habit.todos[0].dates.filter(
+                (date) => date !== todo.range.from
+            );
+
+            await updateDoc(namelessOneRef, { dates: updatedDates });
+        }
+
+        await updateDoc(todoRef, { refId: todoRef.id });
     }
 
-    function delete_todo(habitId, todoId) {
-        remove_todo(habitId, todoId);
+    async function delete_todo(habitId, todoId) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}/todos/${todoId}`
+            );
+            const index = habits.findIndex((habit) => habit.refId === habitId);
+            const habit = habits[index];
+            const todos = habit.todos.filter((todo) => todo.refId !== todoId);
 
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-        const todos = habit.todos.filter((todo) => todo.id !== todoId);
+            todos.forEach(async (todo, index) => {
+                if (!index) return;
+                try {
+                    const ref = doc(
+                        getFirestore(),
+                        `users/${userId}/habits/${habitId}/todos/${todo.refId}`
+                    );
 
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, todos })
-                .concat(prevHabits.slice(index + 1))
-        );
+                    await updateDoc(ref, { index });
+                } catch (wrror) {
+                    console.log(`ERROR UPDATING INDEX: ${wrror}`);
+                }
+            });
+
+            setHabits((prevHabits) =>
+                prevHabits
+                    .slice(0, index)
+                    .concat({ ...habit, todos })
+                    .concat(prevHabits.slice(index + 1))
+            );
+
+            await deleteDoc(docRef);
+        } catch (wrror) {
+            console.log(`ERROR DELETING TODO: ${wrror}`);
+        }
     }
 
-    function rename_todo(habitId, todoId, name) {
-        change_todo_name(habitId, todoId, name);
+    async function rename_todo(habitId, todoId, name) {
+        try {
+            const userId = getAuth().currentUser.uid;
+            const docRef = doc(
+                getFirestore(),
+                `users/${userId}/habits/${habitId}/todos/${todoId}`
+            );
+            const index = habits.findIndex((habit) => habit.refId === habitId);
+            const habit = habits[index];
+            const todoIndex = habit.todos.findIndex(
+                (todo) => todo.refId === todoId
+            );
+            const todo = habit.todos[todoIndex];
+            const todos = habit.todos
+                .slice(0, todoIndex)
+                .concat({ ...todo, name })
+                .concat(habit.todos.slice(todoIndex + 1));
 
-        const index = habits.findIndex((habit) => habit.id === habitId);
-        const habit = habits[index];
-        const todoIndex = habit.todos.findIndex((todo) => todo.id === todoId);
-        const todo = habit.todos[todoIndex];
-        const todos = habit.todos
-            .slice(0, todoIndex)
-            .concat({ ...todo, name })
-            .concat(habit.todos.slice(todoIndex + 1));
+            setHabits((prevHabits) =>
+                prevHabits
+                    .slice(0, index)
+                    .concat({ ...habit, todos })
+                    .concat(prevHabits.slice(index + 1))
+            );
 
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, todos })
-                .concat(prevHabits.slice(index + 1))
-        );
+            await updateDoc(docRef, { name });
+        } catch (wrror) {
+            console.log(`ERROR UPDATING TODO NAME: ${wrror}`);
+        }
     }
 
-    async function load_habits() {
+    function load_habits() {
         const userId = getAuth().currentUser.uid;
         const habitsQuery = query(
             collection(getFirestore(), `users/${userId}/habits`),
             orderBy("timestamp", "asc")
         );
 
-        onSnapshot(habitsQuery, (snapshot) =>
+        const unsub = onSnapshot(habitsQuery, (snapshot) =>
             snapshot.docChanges().forEach(async (change) => {
                 if (change.type === "removed")
                     setHabits((prevHabits) =>
@@ -365,7 +432,6 @@ function App() {
 
                     todosDocs.forEach((todo) => todos.push(todo.data()));
 
-                    console.log(todos);
                     todos.sort((a, b) => a.index - b.index);
 
                     setHabits((prevHabits) => {
@@ -383,6 +449,7 @@ function App() {
                 }
             })
         );
+        return unsub;
     }
 
     useEffect(() => {
@@ -390,10 +457,14 @@ function App() {
     }, []);
 
     useEffect(() => {
+        let unsub;
+
         onAuthStateChanged(getAuth(), () => {
             setIsLoggedIn(() => !!getAuth().currentUser);
-            if (getAuth().currentUser) load_habits();
+            if (getAuth().currentUser) unsub = load_habits();
         });
+
+        return () => (unsub ? unsub() : "");
     }, []);
 
     return (
@@ -427,7 +498,6 @@ function App() {
                             element={
                                 <Homepage
                                     habits={habits}
-                                    // update={update}
                                     update={check_habit}
                                     add_habit={create_habit}
                                 />
@@ -442,7 +512,6 @@ function App() {
                                 element={
                                     <Habit
                                         habit={habit}
-                                        // update_cell={update}
                                         update_cell={check_habit}
                                         update_detail={update_detail}
                                         change_image={switch_image}

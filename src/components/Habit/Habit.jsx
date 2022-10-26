@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import date_in_range from "../../utilities/date_in_range";
 import "./habit.css";
+import { nanoid } from "nanoid";
 
 export default function Habit({
     habit,
@@ -113,7 +114,7 @@ export default function Habit({
 
     function toggle_range(todoId, currentValue, side) {
         const { todos } = habit;
-        const index = todos.findIndex((todo) => todo.id === todoId);
+        const index = todos.findIndex((todo) => todo.refId === todoId);
         const todo = todos[index];
         const range = { ...todo.range };
         let toRelocateId;
@@ -146,12 +147,12 @@ export default function Habit({
 
         if (check_for_boundaries(range)) toRelocateId = habit.id;
 
-        toggle_habit_range(habit.id, todo.id, range, toRelocateId);
+        toggle_habit_range(habit.refId, todoId, range, toRelocateId);
     }
 
     function change_date(todoId, side, date) {
         const { todos } = habit;
-        const index = todos.findIndex((todo) => todo.id === todoId);
+        const index = todos.findIndex((todo) => todo.refId === todoId);
         const todo = todos[index];
         const range = { ...todo.range };
         const otherSide = side === "from" ? "to" : "from";
@@ -169,9 +170,9 @@ export default function Habit({
 
         range[side] = date;
 
-        if (check_for_boundaries(range)) toRelocateId = habit.id;
+        if (check_for_boundaries(range)) toRelocateId = habit.refId;
 
-        toggle_habit_range(habit.id, todo.id, range, toRelocateId);
+        toggle_habit_range(habit.refId, todo.refId, range, toRelocateId);
     }
 
     function check_for_boundaries(range) {
@@ -194,19 +195,20 @@ export default function Habit({
         const todo = {
             name: `TODO ${habit.todos.length}`,
             range: { from: string, to: "free" },
-            id: Math.random().toString(16).slice(-10),
+            id: nanoid(),
             dates: [],
+            index: habit.todos.length,
         };
 
-        add_todo_to_habit(habit.id, todo);
+        add_todo_to_habit(habit.refId, todo);
     }
 
     function delete_given_todo(todoId) {
-        delete_todo(habit.id, todoId);
+        delete_todo(habit.refId, todoId);
     }
 
     function change_todo_name(todoId, name) {
-        rename_todo(habit.id, todoId, name);
+        rename_todo(habit.refId, todoId, name);
     }
 
     return (
@@ -349,6 +351,7 @@ export default function Habit({
                                 change_date={change_date}
                                 delete_todo={delete_given_todo}
                                 change_name={change_todo_name}
+                                onlyLocal={false}
                             />
                         );
                     })}
