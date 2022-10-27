@@ -80,7 +80,7 @@
     border-radius: 0.5rem;
     align-self: stretch;
     line-height: 1.25rem;
-    max-height: 15rem;
+    /* max-height: 15rem; */
 }
 
 .habit .settings {
@@ -189,6 +189,11 @@
     background: rgb(124, 241, 124);
 }
 
+.habit .loading-icon {
+    width: 250px;
+    height: 250px;
+}
+
 @media screen and (max-width: 500px) {
     .habit {
         gap: 1rem;
@@ -204,5 +209,10 @@
 
     .habit .name-and-description .name-change {
         flex-direction: column;
+    }
+
+    .habit .loading-icon {
+        width: 150px;
+        height: 150px;
     }
 }

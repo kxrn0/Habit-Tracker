@@ -5,11 +5,11 @@ import Tags from "../Tags/Tags";
 import Todo from "../Todo/Todo";
 import SlideScreen from "../SlideScreen/SlideScreen";
 import valid_file_type from "../../utilities/valid_file_type";
-import { Link } from "react-router-dom";
 import { useRef, useState } from "react";
 import date_in_range from "../../utilities/date_in_range";
 import "./habit.css";
 import { nanoid } from "nanoid";
+import Loading from "../Loading/Loading";
 
 export default function Habit({
     habit,
@@ -30,6 +30,7 @@ export default function Habit({
     const [localDescription, setLocalDescription] = useState(habit.description);
     const descriptionRef = useRef(null);
     const [isAboutToDelete, setIsAboutToDelete] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     function update_habit_difficulty(event) {
         const id = event.target.id;
@@ -117,9 +118,9 @@ export default function Habit({
         const index = todos.findIndex((todo) => todo.refId === todoId);
         const todo = todos[index];
         const range = { ...todo.range };
-        let toRelocateId;
+        let toRelocate;
 
-        toRelocateId = null;
+        toRelocate = false;
 
         if (side === "to") currentValue = !currentValue;
 
@@ -145,9 +146,9 @@ export default function Habit({
             range[side] = "free";
         }
 
-        if (check_for_boundaries(range)) toRelocateId = habit.id;
+        toRelocate = check_for_boundaries(range);
 
-        toggle_habit_range(habit.refId, todoId, range, toRelocateId);
+        toggle_habit_range(habit.refId, todoId, range, toRelocate);
     }
 
     function change_date(todoId, side, date) {
@@ -156,9 +157,9 @@ export default function Habit({
         const todo = todos[index];
         const range = { ...todo.range };
         const otherSide = side === "from" ? "to" : "from";
-        let toRelocateId;
+        let toRelocate;
 
-        toRelocateId = null;
+        toRelocate = false;
 
         if (range[otherSide] !== "free") {
             const cond = side === "from" ? (a, b) => a <= b : (a, b) => a >= b;
@@ -170,9 +171,9 @@ export default function Habit({
 
         range[side] = date;
 
-        if (check_for_boundaries(range)) toRelocateId = habit.refId;
+        toRelocate = check_for_boundaries(range);
 
-        toggle_habit_range(habit.refId, todo.refId, range, toRelocateId);
+        toggle_habit_range(habit.refId, todo.refId, range, toRelocate);
     }
 
     function check_for_boundaries(range) {
@@ -211,28 +212,37 @@ export default function Habit({
         rename_todo(habit.refId, todoId, name);
     }
 
+    function delete_given_habit() {
+        setIsDeleting(true);
+        delete_habit(habit.refId);
+    }
+
     return (
         <div className="habit">
             <SlideScreen
                 content={
-                    <div className="delete-message">
-                        <p>Do you really wish to delete</p>
-                        <p className="element-name">{habit.name}</p>
-                        <div className="delete-controls">
-                            <button
-                                className="delete"
-                                onClick={() => delete_habit(habit.refId)}
-                            >
-                                Delete
-                            </button>
-                            <button
-                                className="cancel"
-                                onClick={close_delete_screen}
-                            >
-                                Cancel
-                            </button>
+                    isDeleting ? (
+                        <Loading />
+                    ) : (
+                        <div className="delete-message">
+                            <p>Do you really wish to delete</p>
+                            <p className="element-name">{habit.name}</p>
+                            <div className="delete-controls">
+                                <button
+                                    className="delete"
+                                    onClick={delete_given_habit}
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    className="cancel"
+                                    onClick={close_delete_screen}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )
                 }
                 shown={isAboutToDelete}
                 close={close_delete_screen}
@@ -253,29 +263,33 @@ export default function Habit({
                 close={close_image}
             />
             <div className="info">
-                <Image
-                    src={habit.image}
-                    alt={habit.name}
-                    left={
-                        <label
-                            htmlFor="image-input"
-                            className="image-label-input"
-                        >
-                            <input
-                                type="file"
-                                id="image-input"
-                                onChange={handle_image_input}
-                            />
-                            <span className="icon"></span>
-                        </label>
-                    }
-                    right={
-                        <button
-                            className="expand"
-                            onClick={() => setImageOnDisplay(true)}
-                        ></button>
-                    }
-                />
+                {habit.image ? (
+                    <Image
+                        src={habit.image}
+                        alt={habit.name}
+                        left={
+                            <label
+                                htmlFor="image-input"
+                                className="image-label-input"
+                            >
+                                <input
+                                    type="file"
+                                    id="image-input"
+                                    onChange={handle_image_input}
+                                />
+                                <span className="icon"></span>
+                            </label>
+                        }
+                        right={
+                            <button
+                                className="expand"
+                                onClick={() => setImageOnDisplay(true)}
+                            ></button>
+                        }
+                    />
+                ) : (
+                    <Loading />
+                )}
                 <div className="name-and-description">
                     <div className="name-wrapper">
                         {isNameChanging ? (

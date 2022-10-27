@@ -5,7 +5,8 @@ import Toggle from "../Toggle/Toggle";
 import Content from "../Content/Content";
 import SlideScreen from "../SlideScreen/SlideScreen";
 import { is_substring } from "../../utilities/is_substring";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Loading from "../Loading/Loading";
 
 export default function Homepage({ habits, update, add_habit }) {
     const storageOrKey = "_storage_or_key";
@@ -56,9 +57,9 @@ export default function Homepage({ habits, update, add_habit }) {
     const [aside, setAside] = useState(false);
     const sticks = habits
         .map((habit) => {
-            if (!habit.todos.length) return null;
-
             const method = orFilter ? "some" : "every";
+
+            if (!habit.todos || !habit.todos.length) return null;
 
             if (
                 currentTags[method]((tag) => habit.tags.includes(tag)) ||
@@ -68,6 +69,7 @@ export default function Homepage({ habits, update, add_habit }) {
             return null;
         })
         .filter((stick) => stick !== null);
+
     const [screenOfCreation, setScreenOfCreation] = useState(false);
     const [creationContent, setCreationContent] = useState("");
     const asideInputRef = useRef(null);
@@ -132,8 +134,7 @@ export default function Homepage({ habits, update, add_habit }) {
     function clear_all_tags(tags) {
         let allTags;
 
-        if (tags) allTags = [...get_all_tags(), ...tags];
-        else allTags = get_all_tags();
+        allTags = [...new Set([...get_all_tags(), ...tags])];
 
         sessionStorage.setItem(storageKeyCurrent, "");
         sessionStorage.setItem(storageKeyInactive, JSON.stringify(allTags));
@@ -143,10 +144,11 @@ export default function Homepage({ habits, update, add_habit }) {
         setCurrentShownTags([...allTags]);
     }
 
-    function add_new_habit(habit, file, todos) {
+    async function add_new_habit(habit, file, todos) {
         clear_all_tags(habit.tags);
+        setCreationContent(<Loading />);
+        await add_habit(habit, file, todos);
         close_screen();
-        add_habit(habit, file, todos);
     }
 
     function set_up_screen() {
@@ -169,6 +171,8 @@ export default function Homepage({ habits, update, add_habit }) {
             );
         }
     }
+
+    useEffect(() => clear_all_tags([]), [habits]);
 
     //#endregion
 
@@ -227,7 +231,7 @@ export default function Homepage({ habits, update, add_habit }) {
                     <div className="controls">
                         <button
                             className="clear-filters"
-                            onClick={() => clear_all_tags(null)}
+                            onClick={() => clear_all_tags([])}
                         >
                             Clear all tags
                         </button>

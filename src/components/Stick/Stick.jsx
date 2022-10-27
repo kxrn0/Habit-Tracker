@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import start from "../../utilities/start";
 import date_in_range from "../../utilities/date_in_range";
 import { Link } from "react-router-dom";
+import Loading from "../Loading/Loading";
 
 export default function Stick({ habit, update }) {
     const [activeCell, setActiveCell] = useState("");
@@ -14,9 +15,6 @@ export default function Stick({ habit, update }) {
     const presentDay = new Date();
     const presentTime = start(presentDay);
     let currentDate;
-
-    // console.log(habit);
-    // console.log("------------------");
 
     currentDate = presentTime;
 
@@ -98,7 +96,11 @@ export default function Stick({ habit, update }) {
                 className="link"
                 href="https://ol.reddit.com"
             >
-                <img src={habit.image} alt="habit image" />
+                {habit.image ? (
+                    <img src={habit.image} alt="habit image" />
+                ) : (
+                    <Loading />
+                )}
                 <p className="habit-name">{habit.name}</p>
             </Link>
             <div className="days">

@@ -2,14 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Info from "./components/Info/Info";
 import Habit from "./components/Habit/Habit";
 import { useEffect, useState } from "react";
-import "./css/style.css";
-import "./css/custom_checkbox.css";
 import Homepage from "./components/Homepage/Homepage";
 import Underlink from "./components/Underlink/Underlink";
 import homeIcon from "./assets/home-circle.svg";
 import infoIcon from "./assets/information.svg";
 import date_in_range from "./utilities/date_in_range";
-
 import firebaseConfig from "./firebase_config";
 import { initializeApp } from "firebase/app";
 import {
@@ -40,6 +37,9 @@ import {
     deleteObject,
 } from "firebase/storage";
 import { nanoid } from "nanoid";
+import "./css/style.css";
+import "./css/custom_checkbox.css";
+import load_todos from "./utilities/load_todos";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -57,9 +57,6 @@ function App() {
 
     async function create_habit(habit, file, todos) {
         try {
-            let byme = "https://www.google.com/images/spin-32.gif";
-            habit.image = byme;
-
             const userId = getAuth().currentUser.uid;
             const habitRef = await addDoc(
                 collection(getFirestore(), `users/${userId}/habits`),
@@ -105,7 +102,7 @@ function App() {
             let fileSnapshot, imageURL, storageURI;
 
             updateDoc(docRef, {
-                image: "https://www.google.com/images/spin-32.gif",
+                image: null,
             });
             fileSnapshot = await uploadBytesResumable(habitImageRef, image);
             imageURL = await getDownloadURL(habitImageRef);
@@ -191,6 +188,20 @@ function App() {
                 getFirestore(),
                 `users/${userId}/habits/${habitId}`
             );
+            const habit = habits.find((habit) => habit.refId === habitId);
+            const todoIds = habit.todos.map((todo) => todo.refId);
+            const imageRef = ref(getStorage(), habit.storageURI);
+
+            await deleteObject(imageRef);
+
+            for (let id of todoIds) {
+                const ref = doc(
+                    getFirestore(),
+                    `user/${userId}/habits/${habitId}/todos/${id}`
+                );
+
+                await deleteDoc(ref);
+            }
 
             await deleteDoc(docRef);
 
@@ -200,31 +211,7 @@ function App() {
         }
     }
 
-    async function toggle_habit_range(habitId, todoId, range, toRelocateId) {
-        // change_range(habitId, todoId, range);
-        // const habitIndex = habits.findIndex((habit) => habit.id === habitId);
-        // const habit = habits[habitIndex];
-        // const todoIndex = habit.todos.findIndex((todo) => todo.id === todoId);
-        // const todo = habit.todos[todoIndex];
-        // const dates = todo.dates.filter((date) =>
-        //     date_in_range(new Date(date), range)
-        // );
-        // const todos = habit.todos
-        //     .slice(0, todoIndex)
-        //     .concat({ ...todo, range, dates })
-        //     .concat(habit.todos.slice(todoIndex + 1));
-        // let updatedHabits;
-        // updatedHabits = habits
-        //     .slice(0, habitIndex)
-        //     .concat({ ...habit, todos })
-        //     .concat(habits.slice(habitIndex + 1));
-        // if (toRelocateId) {
-        //     const result = relocate_data(updatedHabits, habit.id);
-        //     updatedHabits = result.data;
-        //     relocate(toRelocateId, result.todo);
-        // }
-        // setHabits(updatedHabits);
-
+    async function toggle_habit_range(habitId, todoId, range, toRelocate) {
         const userId = getAuth().currentUser.uid;
         const todoRef = doc(
             getFirestore(),
@@ -250,7 +237,11 @@ function App() {
             .concat({ ...habit, todos })
             .concat(habits.slice(habitIndex + 1));
 
-        if (toRelocateId) {
+        await updateDoc(todoRef, { range, dates });
+
+        setHabits(updatedHabits);
+
+        if (toRelocate) {
             const result = relocate_data(updatedHabits, habit.refId);
             const namelessRef = doc(
                 getFirestore(),
@@ -270,10 +261,6 @@ function App() {
 
             add_todo_to_habit(habitId, namedOne);
         }
-
-        setHabits(updatedHabits);
-
-        await updateDoc(todoRef, { range, dates });
     }
 
     function relocate_data(data, habitId) {
@@ -423,16 +410,7 @@ function App() {
                     );
                 else {
                     const habit = change.doc.data();
-                    const todosCollection = collection(
-                        getFirestore(),
-                        `users/${userId}/habits/${habit.refId}/todos`
-                    );
-                    const todosDocs = await getDocs(todosCollection);
-                    const todos = [];
-
-                    todosDocs.forEach((todo) => todos.push(todo.data()));
-
-                    todos.sort((a, b) => a.index - b.index);
+                    const todos = await load_todos(habit.refId);
 
                     setHabits((prevHabits) => {
                         const index = prevHabits.findIndex(
@@ -464,7 +442,7 @@ function App() {
             if (getAuth().currentUser) unsub = load_habits();
         });
 
-        return () => (unsub ? unsub() : "");
+        return () => (unsub ? unsub() : null);
     }, []);
 
     return (

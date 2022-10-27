@@ -1,5 +1,3 @@
-import "./content.css";
-
 import Image from "../Image/Image";
 import Difficulty from "../Difficulty/Difficulty";
 import Tags from "../Tags/Tags";
@@ -9,6 +7,7 @@ import valid_file_type from "../../utilities/valid_file_type";
 import { serverTimestamp } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
+import "./content.css";
 
 export default function Content({ add_habit }) {
     const [tags, setTags] = useState([]);
@@ -167,23 +166,6 @@ export default function Content({ add_habit }) {
         );
     }
 
-    function create_new_habit(event) {
-        event.preventDefault();
-
-        add_habit(
-            {
-                name,
-                description,
-                id: nanoid(),
-                difficulty,
-                tags,
-                timestamp: serverTimestamp()
-            },
-            file,
-            todos
-        );
-    }
-
     async function create_image_file() {
         const file = await ten_print(500, 500);
 
@@ -198,6 +180,23 @@ export default function Content({ add_habit }) {
         });
     }
 
+    function create_new_habit(event) {
+        event.preventDefault();
+
+        add_habit(
+            {
+                name,
+                description,
+                id: nanoid(),
+                difficulty,
+                tags,
+                timestamp: serverTimestamp(),
+                image: null,
+            },
+            file,
+            todos
+        );
+    }
     //#endregion
 
     useEffect(() => {

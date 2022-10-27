@@ -101,13 +101,18 @@
     opacity: 0.5;
 }
 
+.stick .loading-icon {
+    width: 5rem;
+    height: 5rem;
+}
+
 @media screen and (max-width: 500px) {
     .stick {
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .stick .days .days-list {
-        gap: .25rem;
+        gap: 0.25rem;
     }
 
     .stick .link img {
@@ -121,7 +126,12 @@
     }
 
     .stick .difficulty span {
-        width: .5rem;
+        width: 0.5rem;
         height: 1.25rem;
+    }
+
+    .stick .loading-icon {
+        width: 3.75rem;
+        height: 3.75rem;
     }
 }
