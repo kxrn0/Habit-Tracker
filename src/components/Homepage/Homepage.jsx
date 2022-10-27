@@ -59,7 +59,7 @@ export default function Homepage({ habits, update, add_habit }) {
         .map((habit) => {
             const method = orFilter ? "some" : "every";
 
-            if (!habit.todos || !habit.todos.length) return null;
+            if (!habit.todos) return null;
 
             if (
                 currentTags[method]((tag) => habit.tags.includes(tag)) ||
@@ -172,7 +172,7 @@ export default function Homepage({ habits, update, add_habit }) {
         }
     }
 
-    // useEffect(() => clear_all_tags([]), [habits]);
+
 
     //#endregion
 
