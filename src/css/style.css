@@ -58,10 +58,10 @@ body {
 
 .App .sign-in-content button {
     background: rgb(233, 223, 223);
-    padding: .5rem 2rem;
-    border-radius: .25rem;
+    padding: 0.5rem 2rem;
+    border-radius: 0.25rem;
     border: none;
-    font-size: .95rem;
+    font-size: 0.95rem;
 }
 
 .App .footer {
@@ -75,6 +75,40 @@ body {
 .App .footer a {
     color: rgb(187, 211, 240);
     text-decoration: none;
+}
+
+.App .state-of-horror {
+    background: rgb(225, 124, 124, 0.75);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    width: 15rem;
+    text-align: center;
+}
+
+.App .state-of-horror .horror {
+    background-image: url("../assets/wifi-off.svg");
+    width: 7rem;
+    height: 7rem;
+}
+
+.App .state-of-horror p {
+    color: rgb(245, 255, 194);
+    font-size: 1rem;
+    font-family: monospace;
+    letter-spacing: .15rem;
+}
+
+.App .state-of-horror .go-home {
+    background-image: url("../assets/home-circle.svg");
+    background-color: transparent;
+    border: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 100%;
 }
 
 @media screen and (max-width: 600px) {

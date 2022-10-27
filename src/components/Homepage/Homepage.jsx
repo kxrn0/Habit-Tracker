@@ -172,7 +172,7 @@ export default function Homepage({ habits, update, add_habit }) {
         }
     }
 
-    useEffect(() => clear_all_tags([]), [habits]);
+    // useEffect(() => clear_all_tags([]), [habits]);
 
     //#endregion
 

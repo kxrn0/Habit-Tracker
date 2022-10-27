@@ -27,7 +27,6 @@ import {
     doc,
     getDoc,
     deleteDoc,
-    getDocs,
 } from "firebase/firestore";
 import {
     getStorage,
@@ -40,15 +39,22 @@ import { nanoid } from "nanoid";
 import "./css/style.css";
 import "./css/custom_checkbox.css";
 import load_todos from "./utilities/load_todos";
+import SlideScreen from "./components/SlideScreen/SlideScreen";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [habits, setHabits] = useState([]);
+    const [isInAStateOfHorror, setIsInAStateOfHorror] = useState(false);
 
     async function sign_in() {
-        const provider = new GoogleAuthProvider();
+        try {
+            const provider = new GoogleAuthProvider();
 
-        await signInWithPopup(getAuth(), provider);
+            await signInWithPopup(getAuth(), provider);
+        } catch (wrror) {
+            console.log(`ERROR, COULDN'T SIGN IN: ${wrror}`);
+            setIsInAStateOfHorror(true);
+        }
     }
 
     function sign_out() {
@@ -84,7 +90,8 @@ function App() {
                 refId: habitRef.id,
             });
         } catch (wrror) {
-            console.log(`ERROR : ${wrror}`);
+            console.log(`ERROR CREATING HABIT: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -112,6 +119,7 @@ function App() {
             await deleteObject(imageRef);
         } catch (wrror) {
             console.log(`ERROR WHILE ATTEMPMTING TO REPLACE IMAGE: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -126,6 +134,7 @@ function App() {
             await updateDoc(docRef, { [detail.label]: detail.value });
         } catch (wrror) {
             console.log(`ERROR UPDATING DETAIL: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -178,6 +187,7 @@ function App() {
             await updateDoc(docRef, { dates });
         } catch (wrror) {
             console.log(wrror);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -208,58 +218,66 @@ function App() {
             window.location.href = "/";
         } catch (wrror) {
             console.log(`ERROR, COULDN'T DELETE HABIT : ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
     async function toggle_habit_range(habitId, todoId, range, toRelocate) {
-        const userId = getAuth().currentUser.uid;
-        const todoRef = doc(
-            getFirestore(),
-            `users/${userId}/habits/${habitId}/todos/${todoId}`
-        );
-        const habitIndex = habits.findIndex((habit) => habit.refId === habitId);
-        const habit = habits[habitIndex];
-        const todoIndex = habit.todos.findIndex(
-            (todo) => todo.refId === todoId
-        );
-        const todo = habit.todos[todoIndex];
-        const dates = todo.dates.filter((date) =>
-            date_in_range(new Date(date), range)
-        );
-        const todos = habit.todos
-            .slice(0, todoIndex)
-            .concat({ ...todo, range, dates })
-            .concat(habit.todos.slice(todoIndex + 1));
-        let updatedHabits;
-
-        updatedHabits = habits
-            .slice(0, habitIndex)
-            .concat({ ...habit, todos })
-            .concat(habits.slice(habitIndex + 1));
-
-        await updateDoc(todoRef, { range, dates });
-
-        setHabits(updatedHabits);
-
-        if (toRelocate) {
-            const result = relocate_data(updatedHabits, habit.refId);
-            const namelessRef = doc(
+        try {
+            const userId = getAuth().currentUser.uid;
+            const todoRef = doc(
                 getFirestore(),
-                `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+                `users/${userId}/habits/${habitId}/todos/${todoId}`
             );
-            const namedOne = {
-                name: habit.name,
-                id: nanoid(),
-                range: { from: "free", to: "free" },
-                dates: [...habit.todos[0].dates],
-                index: habit.todos.length,
-            };
+            const habitIndex = habits.findIndex(
+                (habit) => habit.refId === habitId
+            );
+            const habit = habits[habitIndex];
+            const todoIndex = habit.todos.findIndex(
+                (todo) => todo.refId === todoId
+            );
+            const todo = habit.todos[todoIndex];
+            const dates = todo.dates.filter((date) =>
+                date_in_range(new Date(date), range)
+            );
+            const todos = habit.todos
+                .slice(0, todoIndex)
+                .concat({ ...todo, range, dates })
+                .concat(habit.todos.slice(todoIndex + 1));
+            let updatedHabits;
 
-            updatedHabits = result.data;
+            updatedHabits = habits
+                .slice(0, habitIndex)
+                .concat({ ...habit, todos })
+                .concat(habits.slice(habitIndex + 1));
 
-            await updateDoc(namelessRef, { dates: [] });
+            await updateDoc(todoRef, { range, dates });
 
-            add_todo_to_habit(habitId, namedOne);
+            setHabits(updatedHabits);
+
+            if (toRelocate) {
+                const result = relocate_data(updatedHabits, habit.refId);
+                const namelessRef = doc(
+                    getFirestore(),
+                    `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+                );
+                const namedOne = {
+                    name: habit.name,
+                    id: nanoid(),
+                    range: { from: "free", to: "free" },
+                    dates: [...habit.todos[0].dates],
+                    index: habit.todos.length,
+                };
+
+                updatedHabits = result.data;
+
+                await updateDoc(namelessRef, { dates: [] });
+
+                add_todo_to_habit(habitId, namedOne);
+            }
+        } catch (wrror) {
+            console.log(`ERORR, COULDN'T TOGGLE RANGE: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -285,45 +303,50 @@ function App() {
     }
 
     async function add_todo_to_habit(habitId, todo) {
-        const index = habits.findIndex((habit) => habit.refId === habitId);
-        const habit = habits[index];
-        const namelessDates = habit.todos[0].dates.filter(
-            (date) => date != todo.range.from
-        );
-        const todos = [
-            { ...habit.todos[0], dates: namelessDates },
-            ...habit.todos.slice(1),
-            todo,
-        ];
-        const userId = getAuth().currentUser.uid;
-        const todoCollection = collection(
-            getFirestore(),
-            `users/${userId}/habits/${habitId}/todos`
-        );
-        const todoRef = await addDoc(todoCollection, todo);
-
-        todo.refId = todoRef.id;
-
-        setHabits((prevHabits) =>
-            prevHabits
-                .slice(0, index)
-                .concat({ ...habit, todos })
-                .concat(prevHabits.slice(index + 1))
-        );
-
-        if (habit.todos[0].dates.some((date) => date === todo.range.from)) {
-            const namelessOneRef = doc(
+        try {
+            const index = habits.findIndex((habit) => habit.refId === habitId);
+            const habit = habits[index];
+            const namelessDates = habit.todos[0].dates.filter(
+                (date) => date != todo.range.from
+            );
+            const todos = [
+                { ...habit.todos[0], dates: namelessDates },
+                ...habit.todos.slice(1),
+                todo,
+            ];
+            const userId = getAuth().currentUser.uid;
+            const todoCollection = collection(
                 getFirestore(),
-                `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+                `users/${userId}/habits/${habitId}/todos`
             );
-            const updatedDates = habit.todos[0].dates.filter(
-                (date) => date !== todo.range.from
+            const todoRef = await addDoc(todoCollection, todo);
+
+            todo.refId = todoRef.id;
+
+            setHabits((prevHabits) =>
+                prevHabits
+                    .slice(0, index)
+                    .concat({ ...habit, todos })
+                    .concat(prevHabits.slice(index + 1))
             );
 
-            await updateDoc(namelessOneRef, { dates: updatedDates });
+            if (habit.todos[0].dates.some((date) => date === todo.range.from)) {
+                const namelessOneRef = doc(
+                    getFirestore(),
+                    `users/${userId}/habits/${habitId}/todos/${habit.todos[0].refId}`
+                );
+                const updatedDates = habit.todos[0].dates.filter(
+                    (date) => date !== todo.range.from
+                );
+
+                await updateDoc(namelessOneRef, { dates: updatedDates });
+            }
+
+            await updateDoc(todoRef, { refId: todoRef.id });
+        } catch (wrror) {
+            console.log(`ERORR, COULDN'T ADD TODO: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
-
-        await updateDoc(todoRef, { refId: todoRef.id });
     }
 
     async function delete_todo(habitId, todoId) {
@@ -339,16 +362,12 @@ function App() {
 
             todos.forEach(async (todo, index) => {
                 if (!index) return;
-                try {
-                    const ref = doc(
-                        getFirestore(),
-                        `users/${userId}/habits/${habitId}/todos/${todo.refId}`
-                    );
+                const ref = doc(
+                    getFirestore(),
+                    `users/${userId}/habits/${habitId}/todos/${todo.refId}`
+                );
 
-                    await updateDoc(ref, { index });
-                } catch (wrror) {
-                    console.log(`ERROR UPDATING INDEX: ${wrror}`);
-                }
+                await updateDoc(ref, { index });
             });
 
             setHabits((prevHabits) =>
@@ -361,6 +380,7 @@ function App() {
             await deleteDoc(docRef);
         } catch (wrror) {
             console.log(`ERROR DELETING TODO: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -392,6 +412,7 @@ function App() {
             await updateDoc(docRef, { name });
         } catch (wrror) {
             console.log(`ERROR UPDATING TODO NAME: ${wrror}`);
+            setIsInAStateOfHorror(true);
         }
     }
 
@@ -430,6 +451,10 @@ function App() {
         return unsub;
     }
 
+    function go_home() {
+        window.location.href = "/";
+    }
+
     useEffect(() => {
         initializeApp(firebaseConfig);
     }, []);
@@ -448,6 +473,23 @@ function App() {
     return (
         <div className="App">
             <BrowserRouter>
+                <SlideScreen
+                    content={
+                        <div className="state-of-horror">
+                            <span className="horror"></span>
+                            <p>
+                                Error processing your request, please connect to
+                                the internet and try again!
+                            </p>
+                            <button
+                                className="go-home"
+                                onClick={go_home}
+                            ></button>
+                        </div>
+                    }
+                    close={go_home}
+                    shown={isInAStateOfHorror}
+                />
                 <nav className="navbar">
                     <div className="logo">Kerosene</div>
                     <ul className="links">
