@@ -57,8 +57,8 @@ function App() {
         }
     }
 
-    function sign_out() {
-        signOut(getAuth());
+    async function sign_out() {
+        await signOut(getAuth());
     }
 
     async function create_habit(habit, file, todos) {
@@ -82,6 +82,7 @@ function App() {
                 const todoRef = await addDoc(todosCollRef, todos[i]);
 
                 await updateDoc(todoRef, { refId: todoRef.id });
+                todos[i].refId = todoRef.id;
             }
 
             await updateDoc(habitRef, {
@@ -89,6 +90,8 @@ function App() {
                 storageURI,
                 refId: habitRef.id,
             });
+
+            go_home();
         } catch (wrror) {
             console.log(`ERROR CREATING HABIT: ${wrror}`);
             setIsInAStateOfHorror(true);
@@ -215,7 +218,7 @@ function App() {
 
             await deleteDoc(docRef);
 
-            window.location.href = "/";
+            go_home();
         } catch (wrror) {
             console.log(`ERROR, COULDN'T DELETE HABIT : ${wrror}`);
             setIsInAStateOfHorror(true);
@@ -452,7 +455,23 @@ function App() {
     }
 
     function go_home() {
-        window.location.href = "/";
+        window.location.href = "/Habit-Tracker";
+    }
+
+    async function roll_todos(habitId) {
+        const index = habits.findIndex((habit) => habit.refId === habitId);
+        const habit = habits[index];
+
+        if (habit.todos && habit.todos.length) return;
+
+        const todos = await load_todos(habitId);
+
+        setHabits((prevHabits) =>
+            prevHabits
+                .slice(0, index)
+                .concat({ ...habit, todos })
+                .concat(prevHabits.slice(index + 1))
+        );
     }
 
     useEffect(() => {
@@ -464,7 +483,9 @@ function App() {
 
         onAuthStateChanged(getAuth(), () => {
             setIsLoggedIn(() => !!getAuth().currentUser);
-            if (getAuth().currentUser) unsub = load_habits();
+            if (getAuth().currentUser) {
+                unsub = load_habits();
+            }
         });
 
         return () => (unsub ? unsub() : null);
@@ -520,6 +541,7 @@ function App() {
                                     habits={habits}
                                     update={check_habit}
                                     add_habit={create_habit}
+                                    roll_todos={roll_todos}
                                 />
                             }
                             path="/Habit-Tracker"

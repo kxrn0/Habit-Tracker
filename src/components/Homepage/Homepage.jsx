@@ -5,10 +5,10 @@ import Toggle from "../Toggle/Toggle";
 import Content from "../Content/Content";
 import SlideScreen from "../SlideScreen/SlideScreen";
 import { is_substring } from "../../utilities/is_substring";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Loading from "../Loading/Loading";
 
-export default function Homepage({ habits, update, add_habit }) {
+export default function Homepage({ habits, update, add_habit, roll_todos }) {
     const storageOrKey = "_storage_or_key";
     const [orFilter, setOrFilter] = useState(() => {
         let filter;
@@ -59,13 +59,18 @@ export default function Homepage({ habits, update, add_habit }) {
         .map((habit) => {
             const method = orFilter ? "some" : "every";
 
-            if (!habit.todos) return null;
+            if (!habit.todos || !habit.todos.length) {
+                roll_todos(habit.refId);
+                return null;
+            }
 
             if (
                 currentTags[method]((tag) => habit.tags.includes(tag)) ||
                 !currentTags.length
             )
-                return <Stick key={habit.id} habit={habit} update={update} />;
+                return (
+                    <Stick key={habit.refId} habit={habit} update={update} />
+                );
             return null;
         })
         .filter((stick) => stick !== null);
@@ -171,8 +176,6 @@ export default function Homepage({ habits, update, add_habit }) {
             );
         }
     }
-
-
 
     //#endregion
 
