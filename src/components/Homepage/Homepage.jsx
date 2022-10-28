@@ -5,7 +5,7 @@ import Toggle from "../Toggle/Toggle";
 import Content from "../Content/Content";
 import SlideScreen from "../SlideScreen/SlideScreen";
 import { is_substring } from "../../utilities/is_substring";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Loading from "../Loading/Loading";
 
 export default function Homepage({ habits, update, add_habit, roll_todos }) {
@@ -176,6 +176,8 @@ export default function Homepage({ habits, update, add_habit, roll_todos }) {
             );
         }
     }
+
+    useEffect(() => clear_all_tags([]), [habits]);
 
     //#endregion
 
